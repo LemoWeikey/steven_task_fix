@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Modern business intelligence and control system dashboard">
+    <title>Business Intelligence Dashboard</title>
+    <link rel="stylesheet" href="index.css">
+    <!-- Chart.js for beautiful charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- SheetJS for Excel file reading -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="app-background"></div>
+
+    <div class="app-container" id="app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <!-- Brand/Logo -->
+            <div class="sidebar-brand">
+                <div class="brand-logo">
+                    <div class="brand-icon">
+                        <i data-lucide="zap"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h1>DataFlow</h1>
+                        <p>Intelligence Hub</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="overview">
+                            <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="insight">
+                            <span class="nav-icon"><i data-lucide="lightbulb"></i></span>
+                            <span>Insight</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="copilot">
+                            <span class="nav-icon"><i data-lucide="bot"></i></span>
+                            <span>Copilot</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="control">
+                            <span class="nav-icon"><i data-lucide="settings"></i></span>
+                            <span>Control System</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section id="insight-section" class="content-section">
+                <div class="content-header">
+                    <h1 class="content-title">Insight</h1>
+                    <p class="content-subtitle">Analytics dashboard for selected company</p>
+                </div>
+
+                <!-- Company Selector -->
+                <div class="company-selector-container">
+                    <div class="company-selector" id="companySelector">
+                        <div class="selector-header" id="selectorHeader">
+                            <div class="selector-label">
+                                <i data-lucide="building-2"></i>
+                                <span id="selectedCompanyName">Select a company...</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="selector-arrow"></i>
+                        </div>
+                        <div class="selector-dropdown hidden" id="selectorDropdown">
+                            <div class="dropdown-search">
+                                <i data-lucide="search"></i>
+                                <input type="text" placeholder="Search companies..." id="companySearch">
+                            </div>
+                            <div class="dropdown-list" id="companyList">
+                                <!-- Companies will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading Dashboard Data...</p>
+                </div>
+
+                <!-- Dashboard Content (hidden until company selected) -->
+                <div id="dashboardContent" class="dashboard-content hidden">
+                    <!-- Charts Row -->
+                    <div class="charts-row">
+                        <!-- Line Chart -->
+                        <div class="chart-card" data-chart="line" data-chart-type="line" draggable="true">
+                            <div class="chart-header">
+                                <h3>Transactions & Revenue</h3>
+                                <button class="expand-btn" data-chart="line">
+                                    <i data-lucide="maximize-2"></i>
+                                </button>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="lineChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Pie Chart -->
+                        <div class="chart-card" data-chart="pie" data-chart-type="pie" draggable="true">
+                            <div class="chart-header">
+                                <h3>Category Distribution</h3>
+                                <button class="expand-btn" data-chart="pie">
+                                    <i data-lucide="maximize-2"></i>
+                                </button>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="pieChart"></canvas>
+                            </div>
+                            <!-- Special Pie Chart Popup -->
+                            <div class="pie-popup hidden" id="piePopup">
+                                <div class="popup-header">
+                                    <h4 id="popupTitle">Top 10 Products</h4>
+                                    <button class="close-popup-btn" id="closePiePopup">
+                                        <i data-lucide="x"></i>
+                                    </button>
+                                </div>
+                                <div class="popup-chart-container">
+                                    <canvas id="piePopupChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bar Chart -->
+                        <div class="chart-card" data-chart="bar" data-chart-type="bar" draggable="true">
+                            <div class="chart-header">
+                                <h3>Top 10 Products</h3>
+                                <button class="expand-btn" data-chart="bar">
+                                    <i data-lucide="maximize-2"></i>
+                                </button>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="barChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Company Details Section -->
+                    <div class="company-details-section">
+                        <div class="section-header">
+                            <h2>Company Details</h2>
+                        </div>
+                        <div class="details-grid" id="companyDetails">
+                            <!-- Details will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Modal -->
+                <div class="chart-modal hidden" id="chartModal">
+                    <div class="modal-overlay"></div>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 id="modalTitle">Chart</h2>
+                            <button class="close-modal-btn" id="closeModal">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        <div class="modal-chart-container">
+                            <canvas id="modalChart"></canvas>
+                        </div>
+                        <!-- Pie Chart Popup for Modal -->
+                        <div class="pie-popup hidden" id="modalPiePopup">
+                            <div class="popup-header">
+                                <h4 id="modalPopupTitle">Top 10 Products</h4>
+                                <button class="close-popup-btn" id="closeModalPiePopup">
+                                    <i data-lucide="x"></i>
+                                </button>
+                            </div>
+                            <div class="popup-chart-container">
+                                <canvas id="modalPiePopupChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Insight Section -->
+            <section id="overview-section" class="content-section hidden">
+                <div class="content-header">
+                    <h1 class="content-title">Overview</h1>
+                    <p class="content-subtitle">Data-driven insights and analytics</p>
+                </div>
+
+                <!-- Filter Control System -->
+                <div class="filter-control-system">
+                    <div class="filter-group">
+                        <div class="filter-header">
+                            <i data-lucide="barcode"></i>
+                            <h3>HS Codes</h3>
+                        </div>
+                        <div class="filter-list-container" id="filterHS">
+                            <!-- Checkboxes generated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <div class="filter-header">
+                            <i data-lucide="tag"></i>
+                            <h3>Categories</h3>
+                        </div>
+                        <div class="filter-list-container" id="filterCategory">
+                            <!-- Checkboxes generated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <div class="filter-header">
+                            <i data-lucide="package"></i>
+                            <h3>Products</h3>
+                        </div>
+                        <div class="filter-list-container" id="filterProduct">
+                            <!-- Checkboxes generated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overview Charts Grid -->
+                <div class="overview-grid">
+                    <!-- Graph 1: Monthly Trends (Total Price & Amount) -->
+                    <div class="overview-card wide">
+                        <div class="card-header">
+                            <h3>Monthly Performance</h3>
+                            <p>Total Revenue (USD) vs Volume</p>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="ovMonthlyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Graph 2: Avg Unit Price -->
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h3>Price Trends</h3>
+                            <p>Avg Unit Price (USD)</p>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="ovPriceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Graph 3: Top 10 Companies -->
+                    <div class="overview-card wide">
+                        <div class="card-header">
+                            <h3>Top 10 Leaders</h3>
+                            <p>Revenue & Volume by Supplier</p>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="ovTopChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Copilot Section -->
+            <section id="copilot-section" class="content-section hidden">
+                <div class="content-header">
+                    <h1 class="content-title">Copilot</h1>
+                    <p class="content-subtitle">AI-powered assistance for your business</p>
+                </div>
+
+                <div class="card">
+                    <p style="color: var(--text-secondary);">Copilot content will be displayed here.</p>
+                </div>
+            </section>
+
+            <!-- Control System Section -->
+            <section id="control-section" class="content-section hidden">
+                <div class="content-header">
+                    <h1 class="content-title">Control System</h1>
+                    <p class="content-subtitle">Your custom dashboard - drag charts here from Overview</p>
+                </div>
+
+                <!-- Drop Zone -->
+                <div class="drop-zone" id="chartDropZone">
+                    <div class="drop-zone-content">
+                        <i data-lucide="layout-grid" class="drop-zone-icon"></i>
+                        <h3>Drag Charts Here</h3>
+                        <p>Drag any chart from Overview to build your custom dashboard</p>
+                    </div>
+                </div>
+
+                <div class="dropped-charts-section" id="droppedChartsSection" style="display: none;">
+                    <div class="section-header">
+                        <h2>Your Custom Dashboard</h2>
+                        <div class="dashboard-actions">
+                            <button class="analyze-btn" id="analyzeDashboard">
+                                <i data-lucide="sparkles"></i>
+                                Analyze Dashboard
+                            </button>
+                            <button class="clear-all-btn" id="clearAllCharts">
+                                <i data-lucide="trash-2"></i>
+                                Clear All
+                            </button>
+                        </div>
+                    </div>
+                    <div class="dropped-charts-container" id="droppedChartsContainer">
+                        <!-- Dropped charts will be rendered here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- AI Analysis Split-Screen View -->
+    <div class="analysis-view hidden" id="analysisView">
+        <div class="analysis-header">
+            <button class="back-btn" id="backToDashboard">
+                <i data-lucide="arrow-left"></i>
+                Back to Dashboard
+            </button>
+            <h2>AI Dashboard Analysis</h2>
+        </div>
+        <div class="analysis-content">
+            <!-- Left Panel: Charts -->
+            <div class="analysis-charts-panel">
+                <h3>Your Charts</h3>
+                <div id="analysisChartsContainer">
+                    <!-- Charts will be cloned here -->
+                </div>
+            </div>
+
+            <!-- Right Panel: Report -->
+            <div class="analysis-report-panel">
+                <div class="analysis-loading hidden" id="analysisLoading">
+                    <div class="loading-spinner"></div>
+                    <p>Analyzing your dashboard with AI...</p>
+                </div>
+                <div class="analysis-report hidden" id="analysisReport">
+                    <!-- AI report will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="data-processor.js"></script>
+    <script src="recommendation-controller.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STS Group - Sustainable Textile Solutions</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #009640;
+            /* Approximate STS Green */
+            --primary-blue: #005aa3;
+            /* Approximate STS Blue */
+            --text-dark: #333;
+            --text-light: #666;
+            --bg-light: #f9f9f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            background-color: #fff;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 0.5rem 10%;
+            display: flex;
+            justify-content: flex-end;
+            font-size: 0.9rem;
+        }
+
+        .top-bar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1.5rem;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 1rem 10%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-green);
+        }
+
+        /* Demo Button - Prominent */
+        .btn-demo {
+            background-color: var(--primary-blue);
+            color: white !important;
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .btn-demo:hover {
+            background-color: #004480;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 600px;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1531297461136-82lw8fca16c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 0 1rem;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-hero {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 1rem 2.5rem;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .btn-hero:hover {
+            transform: scale(1.05);
+            background-color: #007a33;
+        }
+
+        /* Services / Tiers */
+        .section-padding {
+            padding: 5rem 10%;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.2rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .tiers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .tier-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border-top: 4px solid var(--primary-green);
+            transition: transform 0.3s;
+        }
+
+        .tier-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .tier-icon {
+            width: 60px;
+            height: 60px;
+            background: #e6f4ea;
+            color: var(--primary-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .tier-card h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        /* Strategic Products */
+        .strategy-section {
+            background-color: var(--bg-light);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .product-item {
+            background: white;
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+
+        .product-item h3 {
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Journey/News */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .news-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .news-date {
+            background: var(--primary-blue);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .news-content {
+            padding: 1.5rem;
+        }
+
+        .news-content h4 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .news-content a {
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .news-content a:hover {
+            color: var(--primary-green);
+        }
+
+        /* Footer */
+        footer {
+            background-color: #222;
+            color: #ddd;
+            padding: 4rem 10%;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-col h4 {
+            color: white;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-col a {
+            color: #aaa;
+            text-decoration: none;
+        }
+
+        .footer-col a:hover {
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem 5%;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <a href="#">Tuyển dụng</a>
+        <a href="#">Tin tức</a>
+        <a href="#">EN / VN</a>
+    </div>
+
+    <header>
+        <a href="#" class="logo">
+            <i data-lucide="leaf" style="color: var(--primary-green);"></i>
+            STS GROUP
+        </a>
+        <nav class="nav-links">
+            <a href="#">Trang chủ</a>
+            <a href="#">Về chúng tôi</a>
+            <a href="#">Dịch vụ & Lộ trình</a>
+            <a href="#">Sản phẩm chiến lược</a>
+            <a href="#">Liên hệ</a>
+            <!-- DEMO BUTTON IN HEADER -->
+            <a href="app.html" class="btn-demo">
+                <i data-lucide="layout-dashboard" width="18"></i> DEMO
+            </a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Xây Dựng Tương Lai Dệt May Việt Nam</h1>
+            <p>Giải pháp phát triển bền vững, minh bạch chuỗi cung ứng và nâng tầm vị thế dệt may Việt Nam trên bản đồ
+                thế giới.</p>
+            <!-- DEMO BUTTON IN HERO -->
+            <a href="app.html" class="btn-hero">
+                Khám Phá Demo <i data-lucide="arrow-right" style="margin-left: 8px;"></i>
+            </a>
+        </div>
+    </section>
+
+    <section class="section-padding">
+        <div class="section-header">
+            <h2>Chuỗi Giá Trị Toàn Diện</h2>
+            <p>Mô hình tích hợp từ nguyên liệu thô đến phân phối bán lẻ</p>
+        </div>
+        <div class="tiers-grid">
+            <div class="tier-card">
+                <div class="tier-icon"><i data-lucide="box"></i></div>
+                <h3>Tier 4: Nguyên liệu thô</h3>
+                <p>Khai thác và xử lý bông xơ</p>
+            </div>
+            <div class="tier-card">
+                <div class="tier-icon"><i data-lucide="scissors"></i></div>
+                <h3>Tier 3: Sợi</h3>
+                <p>Chế biến nguyên liệu chất lượng cao</p>
+            </div>
+            <div class="tier-card">
+                <div class="tier-icon"><i data-lucide="layers"></i></div>
+                <h3>Tier 2: Vải</h3>
+                <p>Công nghệ dệt và hoàn tất tiên tiến</p>
+            </div>
+            <div class="tier-card">
+                <div class="tier-icon"><i data-lucide="shirt"></i></div>
+                <h3>Tier 1: Garment</h3>
+                <p>Lắp ráp sản phẩm thời trang</p>
+            </div>
+            <div class="tier-card">
+                <div class="tier-icon"><i data-lucide="truck"></i></div>
+                <h3>Tier 0: Logistics</h3>
+                <p>Phân phối và bán lẻ toàn cầu</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding strategy-section">
+        <div class="section-header">
+            <h2>Sản Phẩm Chiến Lược</h2>
+            <p>Tiên phong trong công nghệ và giải pháp xanh</p>
+        </div>
+        <div class="product-grid">
+            <div class="product-item">
+                <div style="min-width: 50px;"><i data-lucide="bar-chart-2" color="#009640" size="40"></i></div>
+                <div>
+                    <h3>Data & Market Intelligence</h3>
+                    <p>Phân tích dữ liệu thị trường, xu hướng người mua và dự báo nhu cầu bằng AI.</p>
+                </div>
+            </div>
+            <div class="product-item">
+                <div style="min-width: 50px;"><i data-lucide="globe" color="#009640" size="40"></i></div>
+                <div>
+                    <h3>Sourcing - Made in Vietnam</h3>
+                    <p>Kết nối nguồn cung ứng uy tín, chất lượng từ mạng lưới nhà máy Việt Nam.</p>
+                </div>
+            </div>
+            <div class="product-item">
+                <div style="min-width: 50px;"><i data-lucide="recycle" color="#009640" size="40"></i></div>
+                <div>
+                    <h3>T2T - Recycled T&A</h3>
+                    <p>Giải pháp tái chế Textil-to-Textile khép kín vòng đời sản phẩm.</p>
+                </div>
+            </div>
+            <div class="product-item">
+                <div style="min-width: 50px;"><i data-lucide="leaf" color="#009640" size="40"></i></div>
+                <div>
+                    <h3>EPR & Circular Co-Design</h3>
+                    <p>Thiết kế đồng sáng tạo hướng tới kinh tế tuần hoàn và trách nhiệm mở rộng của nhà sản xuất.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding">
+        <div class="section-header">
+            <h2>Hành Trình Của Chúng Tôi</h2>
+        </div>
+        <div class="news-grid">
+            <div class="news-card">
+                <div class="news-date">Th8 2025</div>
+                <div class="news-content">
+                    <h4><a href="#">Hội thảo "Kết nối Tái chế & EPR 2025": Cơ hội vàng cho doanh nghiệp</a></h4>
+                    <p>Chia sẻ về các quy định mới và cơ hội trong thị trường tái chế dệt may.</p>
+                </div>
+            </div>
+            <div class="news-card">
+                <div class="news-date">Th5 2025</div>
+                <div class="news-content">
+                    <h4><a href="#">Sự kiện ký kết MOU của STS với UKL-Palf</a></h4>
+                    <p>Đẩy mạnh hợp tác môi trường và công nghệ tái chế giữa Việt Nam và Đài Loan.</p>
+                </div>
+            </div>
+            <div class="news-card">
+                <div class="news-date">Th4 2025</div>
+                <div class="news-content">
+                    <h4><a href="#">STS chính thức góp mặt tại SaigonTex 2025</a></h4>
+                    <p>Trưng bày các giải pháp sợi tái chế và vải sinh học mới nhất.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4 style="display: flex; gap: 10px; align-items: center;"><i data-lucide="leaf"></i> STS GROUP</h4>
+                <p>Sustainable Textile Solutions</p>
+                <p style="margin-top: 1rem; color: #aaa;">Tầng 5, Tòa nhà Innovation, TP. HCM</p>
+            </div>
+            <div class="footer-col">
+                <h4>Về Chúng Tôi</h4>
+                <ul>
+                    <li><a href="#">Câu chuyện thương hiệu</a></li>
+                    <li><a href="#">Đội ngũ lãnh đạo</a></li>
+                    <li><a href="#">Đối tác chiến lược</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Dịch Vụ</h4>
+                <ul>
+                    <li><a href="#">Sourcing</a></li>
+                    <li><a href="#">Market Intelligence</a></li>
+                    <li><a href="#">Tư vấn EPR</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Kết nối</h4>
+                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                    <i data-lucide="facebook" style="cursor: pointer;"></i>
+                    <i data-lucide="linkedin" style="cursor: pointer;"></i>
+                    <i data-lucide="youtube" style="cursor: pointer;"></i>
+                </div>
+            </div>
+        </div>
+        <div
+            style="border-top: 1px solid #333; margin-top: 3rem; padding-top: 2rem; text-align: center; color: #666; font-size: 0.9rem;">
+            © 2024 STS Group. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
