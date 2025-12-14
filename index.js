@@ -1679,9 +1679,17 @@ You are analyzing a business dashboard for "${company}" that consists of ${chart
         throw lastError || new Error('All AI models failed. Please check your network or key.');
     }
 
+
     async displayAnalysis(analysisText) {
-        document.getElementById('analysisLoading').classList.add('hidden');
-        const reportDiv = document.getElementById('analysisReport');
+        const loadingEl = document.getElementById('analysisLoading');
+        if (loadingEl) loadingEl.classList.add('hidden');
+
+        const reportDiv = document.getElementById('analysisResult');
+        if (!reportDiv) {
+            console.error('❌ Element #analysisResult not found!');
+            return;
+        }
+
         reportDiv.classList.remove('hidden');
         reportDiv.innerHTML = ''; // Clear previous content
 
