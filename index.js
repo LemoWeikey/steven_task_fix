@@ -522,7 +522,7 @@ class DashboardController {
     }
 
     renderBarChart() {
-        const data = dataProcessor.getTop10Products();
+        const data = dataProcessor.getTopSuppliers(this.selectedCompany);
         if (!data) return;
 
         const ctx = document.getElementById('barChart');
@@ -553,11 +553,17 @@ class DashboardController {
                 ]
             },
             options: {
+                indexAxis: 'y', // Horizontal bars for names
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         display: false  // Hide legend in small view
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: (context) => context[0].label,
+                        }
                     }
                 },
                 scales: {
@@ -566,13 +572,8 @@ class DashboardController {
                             display: false
                         },
                         ticks: {
-                            color: '#94a3b8',
-                            maxRotation: 45,
-                            minRotation: 45,
-                            font: {
-                                size: 9  // Smaller font for small view
-                            },
-                            autoSkip: true
+                            display: false,
+                            color: '#94a3b8'
                         }
                     },
                     y: {
@@ -581,25 +582,16 @@ class DashboardController {
                             color: 'rgba(51, 65, 85, 0.3)'
                         },
                         ticks: {
-                            color: '#8b5cf6',
-                            maxTicksLimit: 5  // Fewer ticks
+                            color: '#e2e8f0', // Lighter text for names
+                            maxTicksLimit: 10,
+                            font: { size: 10 }
                         },
                         title: {
-                            display: false  // Hide title in small view
+                            display: false
                         }
                     },
                     y1: {
-                        position: 'right',
-                        grid: {
-                            drawOnChartArea: false
-                        },
-                        ticks: {
-                            color: '#3b82f6',
-                            maxTicksLimit: 5  // Fewer ticks
-                        },
-                        title: {
-                            display: false  // Hide title in small view
-                        }
+                        display: false // Hide secondary axis in small view
                     }
                 }
             }
@@ -613,18 +605,8 @@ class DashboardController {
         const detailsContainer = document.getElementById('companyDetails');
 
         const details = [
-            { label: 'Total Revenue', value: `$${summary.Total_Revenue?.toLocaleString() || 'N/A'}`, highlight: true },
-            { label: 'Total Transactions', value: summary.Total_Transactions?.toLocaleString() || 'N/A' },
-            { label: 'Total Quantity', value: summary.Total_Quantity?.toLocaleString() || 'N/A' },
-            { label: 'Avg Transaction', value: `$${summary.Avg_Transaction?.toLocaleString() || 'N/A'}` },
-            { label: 'Market Share', value: `${summary['Market_Share_%']?.toFixed(2) || 'N/A'}%` },
-            { label: 'Location', value: summary['Supplier Location'] || summary.City || 'N/A' },
-            { label: 'Phone', value: summary.Phone || 'N/A' },
-            { label: 'Email', value: summary.Email || 'N/A' },
-            { label: 'Website', value: summary.Website || 'N/A' },
-            { label: 'Business Type', value: summary['Business Type'] || 'N/A' },
-            { label: 'Employees', value: summary.Employees || 'N/A' },
-            { label: 'Certifications', value: summary.Certifications || 'N/A' }
+            { label: 'Name', value: summary.Name || this.selectedCompany || 'N/A' },
+            { label: 'Location', value: summary.Location || 'N/A' }
         ];
 
         detailsContainer.innerHTML = details.map(detail => `
@@ -690,7 +672,7 @@ class DashboardController {
         const titles = {
             'line': 'Transactions & Revenue Over Time',
             'pie': 'Category Distribution (Hover to see top products)',
-            'bar': 'Top 10 Products'
+            'bar': 'Top 10 Buyers'
         };
         modalTitle.textContent = titles[chartType] || 'Chart';
 
@@ -712,8 +694,45 @@ class DashboardController {
                 data = dataProcessor.getCategoryDistribution();
                 config = this.getPieChartConfig(data);
             } else if (chartType === 'bar') {
-                data = dataProcessor.getTop10Products();
-                config = this.getBarChartConfig(data);
+                data = dataProcessor.getTop10Buyers();
+                // Reuse existing bar config but ensure indexAxis is y if needed for modal too, 
+                // typically getBarChartConfig might need adjustment or we define it here.
+                // For simplicity, let's use a specific config for the modal to ensure it looks good.
+                config = {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            {
+                                label: 'Revenue (USD)',
+                                data: data.revenue,
+                                backgroundColor: '#8b5cf6',
+                                borderRadius: 6,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Volume',
+                                data: data.volume,
+                                backgroundColor: '#3b82f6',
+                                borderRadius: 6,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                ticks: { color: '#94a3b8' }
+                            },
+                            y1: {
+                                display: false
+                            }
+                        }
+                    }
+                };
             }
 
             if (config) {
@@ -1359,23 +1378,32 @@ class AnalysisController {
         this.dashboard = dashboardController;
         this.dragDrop = dragDropController;
 
-        // API Keys from key.txt
-        this.apiKeys = [
-            "AIzaSyCLbJSF249ButYxXkHbzxjBBB7EgQAPk7Y",
-            "AIzaSyBhByUbP-3rbkGsNj8q6rvmj-hqhOHRIoo",
-            "AIzaSyCedGoX-tIHSHRTKTwmQD8jwSTQTPG4HQE",
-            "AIzaSyCFkMCpGfIzmBc657Fh9ssHhoX1ATK245Q",
-            "AIzaSyCOVsl9tUeO2lsyK_0cFjla65dJAG4z7VU",
-            "AIzaSyBqNQ-40OhpZvoTktCYlFqr966ReXcPuFM",
-            "AIzaSyByGVaTxs8PDcV3cUquBAnyIi2hpauXcRE",
-            "AIzaSyC4aUB5FycI8B09rKqTxewhCmdBwCcLvPg"
-        ];
+        // Load User API Key
+        this.apiKeys = [];
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if (savedKey) {
+            this.apiKeys.push(savedKey);
+        }
+
         this.currentKeyIndex = 0;
 
         this.setupEventListeners();
 
         // Expose for debugging
         window.analysisController = this;
+    }
+
+    async getValidApiKey() {
+        if (this.apiKeys.length > 0) return this.apiKeys[0];
+
+        // Prompt user if no key found
+        const userKey = prompt("Setup Required: Please enter your Google Gemini API Key to enable AI features:");
+        if (userKey && userKey.trim().length > 10) { // Basic validation
+            localStorage.setItem('gemini_api_key', userKey.trim());
+            this.apiKeys = [userKey.trim()];
+            return userKey.trim();
+        }
+        return null;
     }
 
     setupEventListeners() {
@@ -1435,7 +1463,7 @@ class AnalysisController {
             const prompt = this.prepareAnalysisPrompt(chartImages.length);
 
             // Step 3: Call API with Timeout
-            this.updateLoadingStatus('Consulting AI Analyst (this may take ~30s)...');
+            this.updateLoadingStatus('Consulting AI Analyst...');
             const analysis = await this.callGeminiAPI(chartImages, prompt);
 
             // Step 4: Display Results
@@ -1483,12 +1511,13 @@ class AnalysisController {
             const canvas = document.getElementById(`dropped-chart-${chart.id}`);
             if (canvas) {
                 try {
-                    const dataURL = canvas.toDataURL('image/png');
+                    // Use JPEG for faster upload/smaller size
+                    const dataURL = canvas.toDataURL('image/jpeg', 0.8);
                     const base64 = dataURL.split(',')[1];
 
                     images.push({
                         inlineData: {
-                            mimeType: 'image/png',
+                            mimeType: 'image/jpeg',
                             data: base64
                         }
                     });
@@ -1537,125 +1566,120 @@ You are analyzing a business dashboard for "${company}" that consists of ${chart
 *   **Growth Opportunities:** (e.g., "Expand sales in region X...")`;
     }
 
+    // Call Gemini API
     async callGeminiAPI(chartImages, prompt) {
+        // Ensure we have a key
+        const apiKey = await this.getValidApiKey();
+        if (!apiKey) {
+            throw new Error("API Key required. Please reload and provide a valid key.");
+        }
+
         // Try user requested model first, then fallbacks
         const models = [
-            'gemini-2.5-flash',
             'gemini-2.0-flash-exp',
-            'gemini-1.5-flash'
+            'gemini-1.5-flash',
+            'gemini-1.5-pro'
         ];
 
         let lastError = null;
 
         // Model Loop
         for (const model of models) {
-            console.log(`🤖 Model: ${model} - Starting key rotation...`);
+            console.log(`🤖 Model: ${model} - Requesting...`);
 
-            // Key Loop: Try all keys for this model if hit by Rate Limit
-            // Start from currentKeyIndex to distribute load
-            for (let i = 0; i < this.apiKeys.length; i++) {
-                const keyIndex = (this.currentKeyIndex + i) % this.apiKeys.length;
-                const apiKey = this.apiKeys[keyIndex];
-
-                // Only show status update on first attempt or model switch to avoid spamming UI
-                if (i === 0) {
-                    this.updateLoadingStatus(`Consulting AI Analyst (${model})...`);
-                } else {
-                    console.log(`⚠️ Quota exceeded. Rotating to API Key #${keyIndex + 1}...`);
+            try {
+                // Prepare multipart parts
+                const parts = [{ text: prompt }];
+                for (const img of chartImages) {
+                    parts.push(img);
                 }
 
-                try {
-                    // Prepare multipart parts
-                    const parts = [{ text: prompt }];
-                    for (const img of chartImages) {
-                        parts.push(img);
-                    }
-
-                    // Setup timeout
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 60000);
-
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        signal: controller.signal,
-                        body: JSON.stringify({
-                            contents: [{ parts: parts }],
-                            generationConfig: {
-                                temperature: 0.4,
-                                maxOutputTokens: 8192,
-                            }
-                        })
-                    });
-
-                    clearTimeout(timeoutId);
-
-                    if (!response.ok) {
-                        const status = response.status;
-
-                        // Scenario 1: Model not found (404) or Bad Request (400)
-                        // This means the MODEL is the problem, not the key.
-                        // STOP looping keys, break to next model.
-                        if (status === 404 || status === 400) {
-                            console.warn(`Model ${model} failed with ${status}. Switching model...`);
-                            break; // Break inner key loop, continue outer model loop
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: parts }],
+                        generationConfig: {
+                            temperature: 0.4,
+                            maxOutputTokens: 8192,
                         }
+                    })
+                });
 
-                        // Scenario 2: Quota Exceeded (429)
-                        // This means the KEY is the problem.
-                        // CONTINUE looping keys.
-                        if (status === 429) {
-                            console.warn(`Key #${keyIndex + 1} hit quota (429). Trying next key...`);
-                            continue; // Continue inner loop
-                        }
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    const errMsg = errData.error?.message || response.statusText;
 
-                        // Other errors: Log and try next key just in case? Or fail?
-                        // Let's try next key for 5xx errors too.
-                        const errorData = await response.json().catch(() => ({}));
-                        throw new Error(`API Error: ${errorData.error?.message || response.statusText} (${status})`);
+                    // Handle Invalid Key specifically
+                    if (response.status === 403 || errMsg.includes('API key')) {
+                        localStorage.removeItem('gemini_api_key');
+                        this.apiKeys = [];
+                        throw new Error("Invalid API Key. Please reload and enter a new one.");
                     }
 
-                    const data = await response.json();
-
-                    if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-                        console.log(`✅ Success with model: ${model} using Key #${keyIndex + 1}`);
-
-                        // Update current key index to the working one + 1 for next time
-                        this.currentKeyIndex = (keyIndex + 1) % this.apiKeys.length;
-
-                        return data.candidates[0].content.parts[0].text;
-                    } else if (data.promptFeedback && data.promptFeedback.blockReason) {
-                        // Content blocked. This is likely prompt-related, not key/model.
-                        throw new Error(`AI Blocked Content: ${data.promptFeedback.blockReason}`);
-                    }
-
-                    // Valid but empty? Try next key/model
-                    continue;
-
-                } catch (error) {
-                    lastError = error;
-                    // If AbortError (Timeout), we throw immediately because checking 8 keys * 60s is too long
-                    if (error.name === 'AbortError') throw error;
-
-                    // For other errors (like 429 caught as Error above), we loop.
-                    // (Note: the 429 check above 'continue's before throwing, so this catch handles other things)
+                    throw new Error(`Gemini API Error (${response.status}): ${errMsg}`);
                 }
-            } // End Key Loop
+
+                const data = await response.json();
+                console.log('✅ AI Response Received:', data);
+
+                if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+                    return data.candidates[0].content.parts[0].text;
+                }
+
+                throw new Error("Empty response from AI");
+
+            } catch (error) {
+                console.warn(`❌ Model ${model} failed:`, error);
+                lastError = error;
+                // If 403 (Key Error), stop trying other models and fail immediately
+                if (error.message.includes("Invalid API Key")) throw error;
+            }
         } // End Model Loop
 
-        // If we exhausted all Models * all Keys
-        throw lastError || new Error('All AI models and API keys failed. Please check your quota.');
+        throw lastError || new Error('All AI models failed. Please check your network or key.');
     }
 
-    displayAnalysis(analysisText) {
+    async displayAnalysis(analysisText) {
         document.getElementById('analysisLoading').classList.add('hidden');
         const reportDiv = document.getElementById('analysisReport');
         reportDiv.classList.remove('hidden');
+        reportDiv.innerHTML = ''; // Clear previous content
+
+        // Fix Strikethrough Issue: Remove '~' characters that might trigger markdown <del>
+        // Also ensure we don't accidentally create strikethrough with double tildes
+        const cleanText = analysisText.replace(/~/g, '');
 
         if (typeof marked !== 'undefined') {
-            reportDiv.innerHTML = marked.parse(analysisText);
+            // Streaming / Typewriter Effect
+            let index = 0;
+            const speed = 10; // ms per chunk
+            const chunkSize = 15; // chars per chunk (Increased from 2 for faster speed)
+
+            const typeWriter = () => {
+                if (index < cleanText.length) {
+                    index += chunkSize;
+                    const currentText = cleanText.substring(0, index);
+
+                    // Re-render markdown on each tick
+                    // Note: marked handles unclosed tags gracefully usually
+                    reportDiv.innerHTML = marked.parse(currentText);
+
+                    // Auto-scroll to bottom of report panel
+                    const panel = reportDiv.parentElement;
+                    if (panel) panel.scrollTop = panel.scrollHeight;
+
+                    setTimeout(typeWriter, speed);
+                } else {
+                    // Final render to ensure everything is perfect
+                    reportDiv.innerHTML = marked.parse(cleanText);
+                }
+            };
+
+            typeWriter();
         } else {
-            reportDiv.innerHTML = `<pre style="white-space: pre-wrap;">${analysisText}</pre>`;
+            // Fallback (non-streaming)
+            reportDiv.innerHTML = `<pre style="white-space: pre-wrap;">${cleanText}</pre>`;
         }
     }
 
@@ -1763,6 +1787,7 @@ class OverviewController {
             price: null,
             top: null
         };
+        this.topViewType = 'Supplier'; // Default view
         this.init();
     }
 
@@ -1784,9 +1809,22 @@ class OverviewController {
     setupEventListeners() {
         // Filter Containers
         ['filterHS', 'filterCategory', 'filterProduct'].forEach(id => {
-            document.getElementById(id).addEventListener('change', (e) => {
-                if (e.target.type === 'checkbox') {
-                    this.handleFilterChange(e);
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', (e) => {
+                    if (e.target.type === 'checkbox') {
+                        this.handleFilterChange(e);
+                    }
+                });
+            }
+        });
+
+        // Top 10 View Type Toggle
+        document.querySelectorAll('input[name="topViewType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    this.topViewType = e.target.value;
+                    this.updateDashboard(); // Re-render charts
                 }
             });
         });
@@ -1886,7 +1924,8 @@ class OverviewController {
 
         // Aggregations
         const monthlyData = this.aggregateMonthly(filteredData);
-        const topData = this.aggregateTop10(filteredData);
+        // Use new getTopEntities logic with current view type
+        const topData = dataProcessor.getTopEntities(filteredData, this.topViewType);
 
         // Render Charts
         this.renderMonthlyChart(monthlyData);
@@ -1903,36 +1942,27 @@ class OverviewController {
             const date = new Date(d.Date_Trade);
             const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
-            if (!months[key]) months[key] = { revenue: 0, amount: 0, count: 0, unitPriceSum: 0 };
+            if (!months[key]) months[key] = { revenue: 0, amount: 0, count: 0 };
 
             months[key].revenue += d.Total_Price || 0;
             months[key].amount += d.Total_Amount || 0;
             months[key].count += 1;
-            months[key].unitPriceSum += d.Unit_Price || 0;
         });
 
         // Convert to array and sort
-        return Object.keys(months).sort().map(key => ({
-            month: key,
-            revenue: months[key].revenue,
-            amount: months[key].amount,
-            avgPrice: months[key].count ? (months[key].unitPriceSum / months[key].count) : 0
-        }));
-    }
+        return Object.keys(months).sort().map(key => {
+            const revenue = months[key].revenue;
+            const amount = months[key].amount;
+            // Weighted Average Unit Price = Total Revenue / Total Volume
+            const avgPrice = amount !== 0 ? (revenue / amount) : 0;
 
-    aggregateTop10(data) {
-        const suppliers = {};
-        data.forEach(d => {
-            const key = d.Supplier;
-            if (!suppliers[key]) suppliers[key] = { revenue: 0, amount: 0 };
-            suppliers[key].revenue += d.Total_Price || 0;
-            suppliers[key].amount += d.Total_Amount || 0;
+            return {
+                month: key,
+                revenue: revenue,
+                amount: amount,
+                avgPrice: avgPrice
+            };
         });
-
-        return Object.entries(suppliers)
-            .map(([name, val]) => ({ name, ...val }))
-            .sort((a, b) => b.revenue - a.revenue)
-            .slice(0, 10);
     }
 
     // Chart 1: Monthly Trend (Bar: Revenue, Line: Volume)
@@ -2027,6 +2057,7 @@ class OverviewController {
 
         if (this.charts.top) this.charts.top.destroy();
 
+        // data comes in as array of { name, revenue, volume }
         this.charts.top = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -2035,30 +2066,49 @@ class OverviewController {
                     {
                         label: 'Revenue ($)',
                         data: data.map(d => d.revenue),
-                        backgroundColor: '#f59e0b',
-                        yAxisID: 'y'
+                        backgroundColor: '#8b5cf6',
+                        yAxisID: 'y',
+                        borderRadius: 4,
+                        maxBarThickness: 40
                     },
                     {
                         label: 'Volume',
-                        data: data.map(d => d.amount),
+                        data: data.map(d => d.volume),
                         backgroundColor: '#3b82f6',
-                        yAxisID: 'y1'
+                        yAxisID: 'y1',
+                        borderRadius: 4,
+                        maxBarThickness: 40
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'top', labels: { color: '#94a3b8' } } },
+                plugins: { legend: { display: true } }, // Show legend for clarity
                 scales: {
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#94a3b8',
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
                     y: {
-                        type: 'linear', display: true, position: 'left',
-                        ticks: { color: '#94a3b8', callback: v => '$' + (v / 1000000).toFixed(1) + 'M' }
+                        position: 'left',
+                        grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                        ticks: {
+                            color: '#94a3b8',
+                            callback: v => '$' + (v / 1000).toFixed(0) + 'k'
+                        },
+                        title: { display: true, text: 'Revenue', color: '#8b5cf6' }
                     },
                     y1: {
-                        type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false },
-                        ticks: { color: '#3b82f6' }
+                        position: 'right',
+                        display: true,
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: '#3b82f6' },
+                        title: { display: true, text: 'Volume', color: '#3b82f6' }
                     }
                 }
             }

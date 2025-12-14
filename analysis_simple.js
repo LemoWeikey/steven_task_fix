@@ -3,7 +3,7 @@ class AnalysisController {
     constructor(dashboardController, dragDropController) {
         this.dashboard = dashboardController;
         this.dragDrop = dragDropController;
-        
+
         // API Keys from key.txt
         this.apiKeys = [
             "AIzaSyCLbJSF249ButYxXkHbzxjBBB7EgQAPk7Y",
@@ -16,7 +16,7 @@ class AnalysisController {
             "AIzaSyC4aUB5FycI8B09rKqTxewhCmdBwCcLvPg"
         ];
         this.currentKeyIndex = 0;
-        
+
         this.setupEventListeners();
     }
 
@@ -35,10 +35,10 @@ class AnalysisController {
 
     async startAnalysis() {
         console.log('🚀 Starting AI Analysis...');
-        
+
         // Show split view
         this.showSplitView();
-        
+
         // Show loading
         document.getElementById('analysisLoading').classList.remove('hidden');
         document.getElementById('analysisReport').classList.add('hidden');
@@ -46,7 +46,7 @@ class AnalysisController {
         try {
             // Capture charts as images
             const chartImages = await this.captureChartsAsImages();
-            
+
             if (chartImages.length === 0) {
                 throw new Error('No charts to analyze');
             }
@@ -83,7 +83,7 @@ class AnalysisController {
                 try {
                     const dataURL = canvas.toDataURL('image/png');
                     const base64 = dataURL.split(',')[1];
-                    
+
                     images.push({
                         inlineData: {
                             mimeType: 'image/png',
@@ -101,7 +101,7 @@ class AnalysisController {
 
     prepareAnalysisPrompt(chartCount) {
         const company = this.dashboard.selectedCompany || 'the company';
-        
+
         return `Analyze these ${chartCount} business dashboard chart(s) for ${company}.
 
 Provide a brief analysis with:
@@ -114,13 +114,13 @@ Keep it concise and actionable.`;
 
     async callGeminiAPI(chartImages, prompt) {
         const apiKey = this.apiKeys[this.currentKeyIndex];
-        
+
         const parts = [{ text: prompt }];
         for (const img of chartImages) {
             parts.push(img);
         }
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -137,7 +137,7 @@ Keep it concise and actionable.`;
         }
 
         const data = await response.json();
-        
+
         if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
             return data.candidates[0].content.parts[0].text;
         }
@@ -149,7 +149,7 @@ Keep it concise and actionable.`;
         document.getElementById('analysisLoading').classList.add('hidden');
         const reportDiv = document.getElementById('analysisReport');
         reportDiv.classList.remove('hidden');
-        
+
         if (typeof marked !== 'undefined') {
             reportDiv.innerHTML = marked.parse(analysisText);
         } else {
@@ -160,16 +160,16 @@ Keep it concise and actionable.`;
     showSplitView() {
         document.getElementById('app').style.display = 'none';
         document.getElementById('analysisView').classList.remove('hidden');
-        
+
         const container = document.getElementById('analysisChartsContainer');
         container.innerHTML = '';
-        
+
         this.dragDrop.draggedCharts.forEach(chart => {
             const chartCard = this.dragDrop.createChartCard(chart, -1);
             chartCard.querySelector('.remove-chart-btn')?.remove();
             container.appendChild(chartCard);
         });
-        
+
         setTimeout(() => {
             this.dragDrop.draggedCharts.forEach(chart => {
                 this.renderChartInAnalysis(chart);

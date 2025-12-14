@@ -65,20 +65,16 @@ class RecommendationController {
                 <div class="form-group">
                     <label>Strongest Category</label>
                     <select id="recStrongest">
-                        <option value="Clothing">Clothing</option>
-                        <option value="Fabric">Fabric</option>
-                        <option value="Fiber">Fiber</option>
-                        <option value="Filament">Filament</option>
+                        ${dataProcessor.getUniqueCategories().map(cat => `<option value="${cat}">${cat}</option>`).join('')}
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label>Business Activities (Select all that apply)</label>
                     <div class="checkbox-group">
-                        <label><input type="checkbox" id="recIsFabric" checked> Fabric</label>
-                        <label><input type="checkbox" id="recIsClothing" checked> Clothing</label>
-                        <label><input type="checkbox" id="recIsFiber"> Fiber</label>
-                        <label><input type="checkbox" id="recIsFilament"> Filament</label>
+                        ${dataProcessor.getUniqueCategories().map(cat => `
+                            <label><input type="checkbox" class="activity-checkbox" value="${cat}" checked> ${cat}</label>
+                        `).join('')}
                     </div>
                 </div>
 
@@ -112,14 +108,13 @@ class RecommendationController {
     }
 
     runMatching() {
+        const selectedActivities = Array.from(document.querySelectorAll('.activity-checkbox:checked')).map(cb => cb.value);
+
         const criteria = {
             Location: document.getElementById('recLocation').value.trim(),
             Scale: document.getElementById('recScale').value,
             strongest_in_USD: document.getElementById('recStrongest').value,
-            is_fabric: document.getElementById('recIsFabric').checked ? 1 : 0,
-            is_clothing: document.getElementById('recIsClothing').checked ? 1 : 0,
-            is_fiber: document.getElementById('recIsFiber').checked ? 1 : 0,
-            is_filament: document.getElementById('recIsFilament').checked ? 1 : 0,
+            activities: selectedActivities,
             total_in_USD: parseFloat(document.getElementById('recRevenue').value) || 0,
             total_in_Volume: parseFloat(document.getElementById('recVolume').value) || 0
         };
@@ -145,7 +140,7 @@ class RecommendationController {
 
     findMatches(user) {
         // Access data from dataProcessor
-        const companies = dataProcessor.getCompanySummaryRaw();
+        const companies = dataProcessor.generateCompanyProfiles();
 
         if (!companies || companies.length === 0) {
             console.error("No company data available for matching");
@@ -170,12 +165,17 @@ class RecommendationController {
             const score_strongest = (user.strongest_in_USD === company.best_category) ? 1.0 : 0.0;
 
             // 4. Business Activities (Max 1 point)
-            let activity_matches = 0;
-            activity_matches += (user.is_fabric === (company.is_fabric || 0)) ? 1 : 0;
-            activity_matches += (user.is_filament === (company.is_filament || 0)) ? 1 : 0;
-            activity_matches += (user.is_fiber === (company.is_fiber || 0)) ? 1 : 0;
-            activity_matches += (user.is_clothing === (company.is_clothing || 0)) ? 1 : 0;
-            const score_activity = activity_matches / 4.0;
+            // Compare user.activities (array) with company.Business_Activities (array)
+            // Intersection / Union (IoU) or simply Intersection count / User selection count
+            const userActs = new Set(user.activities);
+            const compActs = new Set(company.Business_Activities);
+            let intersection = 0;
+            userActs.forEach(act => {
+                if (compActs.has(act)) intersection++;
+            });
+
+            // Avoid division by zero
+            const score_activity = userActs.size > 0 ? (intersection / userActs.size) : 0;
 
             // 5. Total USD Score (1 point if within +/- 10%)
             // Using wider range for demo purposes (e.g. +/- 20%) to ensure matches
@@ -220,10 +220,10 @@ class RecommendationController {
                 <div class="helper-card">
                     <div class="helper-header">
                         <div class="helper-title">
-                            <h3>${company.Buyer}</h3> <!-- Using Buyer now -->
+                            <h3>${company.Supplier}</h3>
                             <span class="match-badge">${scorePercent}% Match</span>
                         </div>
-                        <button class="view-details-btn" data-company="${company.Buyer}">
+                        <button class="view-details-btn" data-company="${company.Supplier}">
                             View Dashboard
                         </button>
                     </div>
@@ -309,22 +309,20 @@ class RecommendationController {
                                 <div class="chart-header">
                                     <h3>Distribution</h3>
                                     <select id="predDistributionFilter" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.8rem;">
+                                        <option value="Category">By Category</option>
                                         <option value="Product">By Product</option>
-                                        <option value="Label">By Category</option>
                                     </select>
                                 </div>
                                 <div class="chart-container"><canvas id="predPieChart"></canvas></div>
                             </div>
-                            <!-- Chart 3: Top Suppliers (Buyer Context) -->
+                            <!-- Chart 3: Top Buyers -->
                             <div class="chart-card">
                                 <div class="chart-header">
-                                    <h3>Top Suppliers</h3>
+                                    <h3>Top Buyers</h3>
                                     <select id="predSupplierFilter" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.8rem;">
-                                        <option value="General">All Categories</option>
-                                        <option value="Fabric">Fabric</option>
-                                        <option value="Clothing">Clothing</option>
-                                        <option value="Fiber">Fiber</option>
-                                        <option value="Filament">Filament</option>
+                                        <option value="All">All Classifications</option>
+                                        <!-- Dynamic Options -->
+                                        ${dataProcessor.getUniqueHSDescriptions().map(c => `<option value="${c}">${c}</option>`).join('')}
                                     </select>
                                 </div>
                                 <div class="chart-container"><canvas id="predBarChart"></canvas></div>
@@ -358,7 +356,7 @@ class RecommendationController {
                 this.updateDistributionChart(this.currentPredictionCompany, e.target.value);
             });
             document.getElementById('predSupplierFilter').addEventListener('change', (e) => {
-                this.updateSupplierChart(this.currentPredictionCompany, e.target.value);
+                this.updateBuyerChart(this.currentPredictionCompany, e.target.value);
             });
 
             // Full Dashboard Button
@@ -383,55 +381,53 @@ class RecommendationController {
         this.predCharts = this.predCharts || {};
 
         // 1. Line Chart (Performance)
-        const lineData = dataProcessor.getTimeSeriesData(companyName);
+        // 1. Line Chart (Performance) - Supplier Focus
+        const lineData = dataProcessor.getTimeSeriesData(companyName, 'Supplier');
         if (lineData) {
             const ctx = document.getElementById('predLineChart');
             if (this.predCharts.line) this.predCharts.line.destroy();
             this.predCharts.line = new Chart(ctx, this.dashboard.getLineChartConfig(lineData));
         }
 
-        // 2. Pie Chart (Distribution) - Default: Product
-        // Note: currently getCategoryDistribution only does 'Label' (Category). 
-        // We might need to enhance it or just stick to Category for now if 'Product' is too granular for a pie.
-        // But user asked for interactive filters. I added the dropdown. I'll just reload the same chart for now or implement logic if I have time.
-        // Actually, getCategoryDistribution in my previous edit does breakdown by Label. 
-        // I will use 'updateDistributionChart' to handle logic.
-        this.updateDistributionChart(companyName, 'Product'); // Start with Product or Label? User said "tick box". 
-        // Let's assume 'Label' is better for Pie.
-        document.getElementById('predDistributionFilter').value = 'Label';
-        this.updateDistributionChart(companyName, 'Label');
+        // 2. Pie Chart (Distribution) - Default: Category
+        // Note: Defaulting to 'Category' as per plan
+        document.getElementById('predDistributionFilter').value = 'Category';
+        this.updateDistributionChart(companyName, 'Category');
 
-        // 3. Bar Chart (Top Suppliers) - Default: General
-        document.getElementById('predSupplierFilter').value = 'General';
-        this.updateSupplierChart(companyName, 'General');
+        // 3. Bar Chart (Top Buyers) - Default: All
+        document.getElementById('predSupplierFilter').value = 'All';
+        this.updateBuyerChart(companyName, 'All');
     }
 
-    updateDistributionChart(companyName, filterType) {
-        const ctx = document.getElementById('predPieChart');
-        if (this.predCharts.pie) this.predCharts.pie.destroy();
-
-        if (filterType === 'Label') {
-            const pieData = dataProcessor.getCategoryDistribution(companyName);
-            if (pieData) this.predCharts.pie = new Chart(ctx, this.dashboard.getPieChartConfig(pieData));
-        } else {
-            // 'Product' - we can reuse getTop10Products but as a pie? Or just top 5 products?
-            // Let's use getTop10Products data for now.
-            const prodData = dataProcessor.getTop10Products(companyName);
-            if (prodData) {
-                // Adapt to pie format (labels, values)
-                const pieData = { labels: prodData.labels.slice(0, 5), values: prodData.revenue.slice(0, 5) };
-                this.predCharts.pie = new Chart(ctx, this.dashboard.getPieChartConfig(pieData));
-            }
+    updateDistributionChart(companyName, field) {
+        // Pass 'Supplier' role
+        const data = dataProcessor.getCategoryDistribution(companyName, field, 'Supplier');
+        if (data) {
+            const ctx = document.getElementById('predPieChart');
+            if (this.predCharts.pie) this.predCharts.pie.destroy();
+            this.predCharts.pie = new Chart(ctx, this.dashboard.getPieChartConfig(data));
         }
     }
 
-    updateSupplierChart(companyName, filterType) {
-        const ctx = document.getElementById('predBarChart');
-        if (this.predCharts.bar) this.predCharts.bar.destroy();
+    updateBuyerChart(companyName, filterValue) {
+        // Use HS_Description as the filter field, calling getTop10Buyers
+        const data = dataProcessor.getTop10Buyers(companyName, filterValue, 'HS_Description');
+        if (data) {
+            const ctx = document.getElementById('predBarChart');
+            if (this.predCharts.bar) this.predCharts.bar.destroy();
 
-        const barData = dataProcessor.getTopSuppliers(companyName, filterType);
-        if (barData) {
-            this.predCharts.bar = new Chart(ctx, this.dashboard.getBarChartConfig(barData));
+            // Reuse Bar Chart Config but customize title/color if needed
+            // The dashboard.getBarChartConfig sets color to purple/blue which works fine.
+            this.predCharts.bar = new Chart(ctx, {
+                ...this.dashboard.getBarChartConfig(data),
+                options: {
+                    ...this.dashboard.getBarChartConfig(data).options,
+                    plugins: {
+                        ...this.dashboard.getBarChartConfig(data).options.plugins,
+                        title: { display: true, text: 'Top Buyers by Revenue' }
+                    }
+                }
+            });
         }
     }
 

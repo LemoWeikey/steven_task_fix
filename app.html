@@ -147,7 +147,7 @@
                         <!-- Bar Chart -->
                         <div class="chart-card" data-chart="bar" data-chart-type="bar" draggable="true">
                             <div class="chart-header">
-                                <h3>Top 10 Products</h3>
+                                <h3>Top 10 Sellers</h3>
                                 <button class="expand-btn" data-chart="bar">
                                     <i data-lucide="maximize-2"></i>
                                 </button>
@@ -266,7 +266,10 @@
                     <div class="overview-card wide">
                         <div class="card-header">
                             <h3>Top 10 Leaders</h3>
-                            <p>Revenue & Volume by Supplier</p>
+                            <div class="toggle-control">
+                                <label><input type="radio" name="topViewType" value="Supplier" checked> Supplier</label>
+                                <label><input type="radio" name="topViewType" value="Buyer"> Buyer</label>
+                            </div>
                         </div>
                         <div class="chart-wrapper">
                             <canvas id="ovTopChart"></canvas>
