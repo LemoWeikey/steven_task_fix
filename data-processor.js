@@ -12,22 +12,34 @@ class DataProcessor {
 
     // Load Excel files using SheetJS
     async loadData() {
+        // Helper to update loading text
+        const updateStatus = (msg) => {
+            console.log(msg);
+            const el = document.querySelector('#loadingState p');
+            if (el) el.textContent = msg;
+        };
+
         try {
-            console.log('📂 Loading data from Excel...');
+            updateStatus('📂 Loading data from Excel...');
 
             // 1. Load Daily Transactions (Source: steven_data_5301.csv)
             let dataString;
             if (window.INJECTED_CSV_DATA) {
-                console.log('📂 Loading injected CSV data...');
+                updateStatus('📂 Processing injected CSV data...');
                 dataString = window.INJECTED_CSV_DATA;
             } else {
+                updateStatus('🌐 Fetching CSV file...');
                 // Fetch the file
                 const response = await fetch('steven_data_5301.csv');
+                if (!response.ok) throw new Error(`CSV Fetch failed: ${response.status}`);
                 dataString = await response.text();
             }
 
+            if (!dataString) throw new Error("Data string is empty");
+
             // Parse CSV directly (Simpler/Faster for CSV) or use SheetJS if preferred. 
             // Using SheetJS for consistency with previous code structure.
+            updateStatus('📊 Parsing workbook...');
             const workbook = XLSX.read(dataString, { type: 'string', cellDates: true });
             const sheetName = workbook.SheetNames[0];
             const dailySheet = workbook.Sheets[sheetName];
@@ -35,6 +47,7 @@ class DataProcessor {
             if (dailySheet) {
                 const rawData = XLSX.utils.sheet_to_json(dailySheet);
                 console.log(`✅ Loaded ${rawData.length} raw records from ${sheetName}`);
+                updateStatus(`✅ Processing ${rawData.length} records...`);
 
                 // Calculate Medians for Scale Logic (Big/Small)
                 // Filter out invalid numbers first
@@ -58,26 +71,22 @@ class DataProcessor {
             } else {
                 console.warn('⚠️ Data sheet not found');
                 this.dailyData = [];
+                updateStatus('⚠️ Data sheet empty or not found');
             }
 
-            // 2. Load Executive Summary & Monthly Trends (For Insight/Dashboard)
-            const summarySheet = workbook.Sheets['Executive Summary'];
-            if (summarySheet) {
-                this.companyData = XLSX.utils.sheet_to_json(summarySheet);
-            }
-
-            const monthlySheet = workbook.Sheets['Monthly Trends'];
-            if (monthlySheet) {
-                this.monthlyTrends = XLSX.utils.sheet_to_json(monthlySheet);
-            }
+            // 2. Load Executive Summary & Monthly Trends (SKIPPING for CSV-only mode or making robust)
+            // Note: In CSV mode, these sheets don't exist in the CSV workbook.
+            // We'll skip trying to find them in the CSV workbook to avoid confusion.
+            this.companyData = [];
+            this.monthlyTrends = [];
 
             // 3. Load Trade Data Expanded (For Insight/Dashboard) - If needed
             try {
-                const tradeResponse = await fetch('trade_data_expanded.xlsx');
-                const tradeBuffer = await tradeResponse.arrayBuffer();
-                const tradeWorkbook = XLSX.read(tradeBuffer, { type: 'array' });
-                const tradeSheet = tradeWorkbook.Sheets[tradeWorkbook.SheetNames[0]];
-                this.tradeData = XLSX.utils.sheet_to_json(tradeSheet);
+                // updateStatus('Trying to load trade_data_expanded.xlsx...'); 
+                // Commented out to prevent 404 errors hanging the app if files are missing in Streamlit
+                // const tradeResponse = await fetch('trade_data_expanded.xlsx');
+                // if (tradeResponse.ok) { ... }
+                this.tradeData = [];
             } catch (e) {
                 console.warn('Could not load trade_data_expanded.xlsx', e);
                 this.tradeData = [];
@@ -85,32 +94,42 @@ class DataProcessor {
 
             // 4. Load Company Info Detailed (For Insight/Dashboard)
             try {
-                const infoResponse = await fetch('company_information_detailed.xlsx');
-                const infoBuffer = await infoResponse.arrayBuffer();
-                const infoWorkbook = XLSX.read(infoBuffer, { type: 'array' });
-                const infoSheet = infoWorkbook.Sheets[infoWorkbook.SheetNames[0]];
-                this.companyInfo = XLSX.utils.sheet_to_json(infoSheet);
+                // updateStatus('Trying to load company_information_detailed.xlsx...');
+                // Commented out for safety
+                this.companyInfo = [];
             } catch (e) {
                 console.warn('Could not load company_information_detailed.xlsx', e);
                 this.companyInfo = [];
             }
 
             // 5. Load Company Summary (For Recommendations)
-            const compSummarySheet = workbook.Sheets['Company Summary'];
-            if (compSummarySheet) {
-                this.companySummary = XLSX.utils.sheet_to_json(compSummarySheet);
-                console.log(`✅ Loaded ${this.companySummary.length} company summaries`);
-            } else {
-                console.warn('⚠️ Company Summary sheet not found');
-            }
+            this.companySummary = [];
 
             // Process Lists
+            updateStatus('⚙️ Finalizing data processing...');
             this.processCompanyList();
 
             console.log('✅ All Data loaded successfully');
             return true;
         } catch (error) {
             console.error('Error loading data:', error);
+            const el = document.querySelector('#loadingState p');
+            if (el) {
+                el.innerText = `❌ Error: ${error.message}`;
+                el.style.color = '#ef4444';
+            }
+            // Also append error to body just in case
+            const errDiv = document.createElement('div');
+            errDiv.style.position = 'fixed';
+            errDiv.style.top = '0';
+            errDiv.style.left = '0';
+            errDiv.style.background = 'red';
+            errDiv.style.color = 'white';
+            errDiv.style.padding = '10px';
+            errDiv.style.zIndex = '99999';
+            errDiv.innerText = `Data Load Error: ${error.message}`;
+            document.body.appendChild(errDiv);
+
             return false;
         }
     }

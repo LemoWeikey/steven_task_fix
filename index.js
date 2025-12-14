@@ -84,6 +84,7 @@ class DashboardController {
         const loadingState = document.getElementById('loadingState');
         if (loadingState) {
             loadingState.classList.add('hidden');
+            loadingState.style.display = 'none'; // Force hide
         }
     }
 
@@ -2116,11 +2117,54 @@ class OverviewController {
     }
 }
 
+// Global Error Handler
+window.addEventListener('unhandledrejection', event => {
+    console.error('Unhandled rejection:', event.reason);
+    const errDiv = document.createElement('div');
+    errDiv.style.position = 'fixed';
+    errDiv.style.bottom = '10px';
+    errDiv.style.right = '10px';
+    errDiv.style.background = 'rgba(239, 68, 68, 0.9)';
+    errDiv.style.color = 'white';
+    errDiv.style.padding = '10px';
+    errDiv.style.borderRadius = '4px';
+    errDiv.style.zIndex = '99999';
+    errDiv.innerText = `Async Error: ${event.reason}`;
+    document.body.appendChild(errDiv);
+});
+
+window.addEventListener('error', event => {
+    console.error('Global error:', event.error);
+    const errDiv = document.createElement('div');
+    errDiv.style.position = 'fixed';
+    errDiv.style.bottom = '50px';
+    errDiv.style.right = '10px';
+    errDiv.style.background = 'rgba(239, 68, 68, 0.9)';
+    errDiv.style.color = 'white';
+    errDiv.style.padding = '10px';
+    errDiv.style.borderRadius = '4px';
+    errDiv.style.zIndex = '99999';
+    errDiv.innerText = `Global Error: ${event.message}`;
+    document.body.appendChild(errDiv);
+});
+
 // Initialize controllers
 try {
+    console.log('🚀 Bootstrapping controllers...');
+    if (typeof NavigationController === 'undefined') throw new Error('NavigationController not defined');
+    if (typeof DashboardController === 'undefined') throw new Error('DashboardController not defined');
+
     const navigation = new NavigationController();
     const dashboard = new DashboardController();
-    const overview = new OverviewController(); // NEW Overview
+
+    // Overview might be optional/new, check definition
+    let overview;
+    if (typeof OverviewController !== 'undefined') {
+        overview = new OverviewController();
+    } else {
+        console.warn('OverviewController not defined');
+    }
+
     const dragDrop = new DragDropController(dashboard);
 
     // Make dragDrop globally accessible for hover check
@@ -2132,5 +2176,10 @@ try {
     console.log('🚀 Application initialized successfully!');
 } catch (error) {
     console.error('CRITICAL ERROR:', error);
-    alert('Application Error: ' + error.message + '\n' + error.stack);
+    const container = document.getElementById('loadingState');
+    if (container) {
+        container.innerHTML = `<p style="color:red; font-weight:bold;">CRITICAL ERROR: ${error.message}</p><p>${error.stack}</p>`;
+    } else {
+        alert('Application Error: ' + error.message);
+    }
 }

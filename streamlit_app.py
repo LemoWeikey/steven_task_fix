@@ -22,18 +22,18 @@ except FileNotFoundError:
 # Load CSV Data to inject
 try:
     csv_content = load_file('steven_data_5301.csv')
-    # Escape backticks or quotes if necessary, but CSV is usually safe if backticks aren't used.
-    # We'll use a safer injection method (JSON.stringify) to handle newlines and quotes correctly.
     import json
+    # Ensure it's a valid JSON string
     json_csv = json.dumps(csv_content)
 except Exception as e:
     print(f"Error loading CSV: {e}")
-    json_csv = "null"
+    json_csv = "null" # JS will see window.INJECTED_CSV_DATA = null;
 
 # Helper script to inject data
 injection_script = f"""
 <script>
     window.INJECTED_CSV_DATA = {json_csv};
+    console.log('📦 CSV Data Injected. Length:', window.INJECTED_CSV_DATA ? window.INJECTED_CSV_DATA.length : 'NULL');
 </script>
 """
 
