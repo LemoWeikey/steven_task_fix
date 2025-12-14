@@ -192,12 +192,51 @@ html_template = f"""
     </div>
 
     <!-- Scripts -->
+    <!-- Data Processor -->
     <script>
-    // Injected Scripts
-    {processor_content}
-    {rec_controller_content}
-    {analysis_controller_content}
-    {js_content}
+    try {
+        {processor_content}
+    } catch (e) { console.error('Data Processor Error:', e); }
+    </script>
+
+    <!-- Recommendation Controller -->
+    <script>
+    try {
+        {rec_controller_content}
+    } catch (e) { console.error('Rec Controller Error:', e); }
+    </script>
+
+    <!-- Analysis Controller -->
+    <script>
+    try {
+        {analysis_controller_content}
+    } catch (e) { console.error('Analysis Controller Error:', e); }
+    </script>
+
+    <!-- Main Index Logic -->
+    <script>
+    try {
+        {js_content}
+    } catch (e) { 
+        console.error('Index JS Error:', e);
+        alert('Critical JS Error in Index: ' + e.message);
+    }
+    </script>
+
+    <!-- GUARANTEED FAIL-SAFE: Remove Loading Screen -->
+    <script>
+    (function() {
+        console.log('🛡️ Fail-safe script loaded. Waiting 4 seconds...');
+        setTimeout(function() {
+            var loading = document.getElementById('loadingState');
+            if (loading) {
+                console.warn('🛡️ Fail-safe executing: Removing loading state.');
+                loading.remove();
+            } else {
+                console.log('🛡️ Loading state already gone.');
+            }
+        }, 4000);
+    })();
     </script>
 </body>
 </html>
