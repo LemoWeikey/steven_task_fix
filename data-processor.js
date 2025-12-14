@@ -631,6 +631,40 @@ class DataProcessor {
         };
     }
 
+    // Get top 10 products overall (no category filter)
+    getTop10Products(companyName = this.selectedCompany, role = 'Buyer') {
+        if (!companyName) return null;
+
+        // Filter trades for selected company
+        const trades = this.dailyData.filter(t => t[role] === companyName);
+
+        // Aggregate by product
+        const productData = {};
+        trades.forEach(trade => {
+            const product = trade.Product;
+            if (!productData[product]) {
+                productData[product] = {
+                    revenue: 0,
+                    volume: 0
+                };
+            }
+            productData[product].revenue += trade.Total_Price || 0;
+            productData[product].volume += trade.Total_Amount || 0;
+        });
+
+        // Convert to array and sort by revenue
+        const products = Object.entries(productData)
+            .map(([name, data]) => ({ name, ...data }))
+            .sort((a, b) => b.revenue - a.revenue)
+            .slice(0, 10);
+
+        return {
+            labels: products.map(p => p.name),
+            revenue: products.map(p => p.revenue),
+            volume: products.map(p => p.volume)
+        };
+    }
+
     // Get top 10 products for a specific category (Buyer Focus)
     getTop10ProductsByCategory(category) {
         if (!this.selectedCompany) return null;
