@@ -4,6 +4,7 @@ import os
 
 st.set_page_config(layout="wide")
 
+def load_file(filename):
     with open(filename, 'r', encoding='utf-8') as f:
         return f.read()
 
