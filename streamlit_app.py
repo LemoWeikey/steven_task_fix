@@ -49,8 +49,8 @@ html_template = f"""
     <style>
         {css_content}
         /* Streamlit Adjustment */
-        body {{ background-color: #0f172a; overflow: hidden; }}
-        #app {{ height: 100vh; width: 100vw; }}
+        body {{ background-color: #0f172a; overflow-y: auto; overflow-x: hidden; }}
+        #app {{ min-height: 100vh; width: 100vw; overflow-y: auto; }}
     </style>
     <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>

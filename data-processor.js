@@ -220,10 +220,57 @@ class DataProcessor {
         return 'Other';
     }
 
+    // Helper: Smart property access (case-insensitive, fuzzy fallback)
+    getValue(item, candidates) {
+        if (!item || !candidates) return undefined;
+        // Normalize keys of the item once might be expensive, so we just look for exact or fuzzy
+        const itemKeys = Object.keys(item);
+
+        for (const candidate of candidates) {
+            // 1. Exact match
+            if (item[candidate] !== undefined) return item[candidate];
+
+            // 2. Case-insensitive match through keys
+            const lowerCand = candidate.toLowerCase();
+            const foundKey = itemKeys.find(k => k.toLowerCase() === lowerCand);
+            if (foundKey) return item[foundKey];
+        }
+        return undefined;
+    }
+
+    // Helper: Robust Date Parser
+    parseDate(value) {
+        if (!value) return null;
+        if (value instanceof Date) return value; // Already a date (SheetJS cellDates: true)
+
+        // Handle Excel Serial Dates (numbers) if cellDates was false
+        if (typeof value === 'number') {
+            return new Date(Math.round((value - 25569) * 86400 * 1000));
+        }
+
+        // Handle strings: YYYY-MM-DD, DD/MM/YYYY, etc.
+        const d = new Date(value);
+        if (!isNaN(d.getTime())) return d;
+
+        // Fallback or complex parsing if needed
+        return null;
+    }
+
     // Helper: Map Steven Data CSV to Dashboard format
     mapStevenData(item, medianRev, medianVol) {
+        // Smart Key Lookups
+        const rawDate = this.getValue(item, ['date', 'Date', 'Date_Trade', 'date_trade']);
+        const rawHs = this.getValue(item, ['hs_code', 'HS Code', 'HS_Code', 'hscode']);
+        const rawProd = this.getValue(item, ['product_label', 'Product Label', 'Description', 'description', 'Product', 'product']);
+        const rawVal = this.getValue(item, ['value_usd', 'Value USD', 'Total Value', 'total_value', 'usd']);
+        const rawQty = this.getValue(item, ['quantity', 'Quantity', 'Vol', 'Volume', 'volume']);
+        const rawSeller = this.getValue(item, ['seller', 'Seller', 'Supplier', 'supplier', 'Foreign Seller']);
+        const rawBuyer = this.getValue(item, ['buyer', 'Buyer', 'Importer', 'importer']);
+        const rawSellerLoc = this.getValue(item, ['seller_country', 'Seller Country', 'Country_Supplier']);
+        const rawBuyerLoc = this.getValue(item, ['buyer_country', 'Buyer Country', 'Country_Buyer']);
+
         // HS Code Info
-        const hsCode = String(item.hs_code || '');
+        const hsCode = String(rawHs || '');
         let category = 'Unknown';
         // Note: Keeping HS description logic as requested
         if (hsCode.startsWith('530110')) category = 'Flax; raw or retted, but not spun';
@@ -232,31 +279,26 @@ class DataProcessor {
         else if (hsCode.startsWith('530130')) category = 'Flax; tow and waste, including yarn waste and garnetted stock';
         else category = `HS ${hsCode}`;
 
-        // Product: Use 'product_label' as requested
-        const product = String(item.product_label || 'Unknown').trim();
+        // Product
+        const product = String(rawProd || 'Unknown').trim();
 
         // Numerics
-        const totalPrice = this.parseNumber(item.value_usd);
-        const totalAmount = this.parseNumber(item.quantity);
+        const totalPrice = this.parseNumber(rawVal);
+        const totalAmount = this.parseNumber(rawQty);
 
-        // Unit Price (uusd)
-        let avgUnitPrice = this.parseNumber(item.uusd);
-        if (avgUnitPrice === 0 && totalAmount !== 0) {
-            avgUnitPrice = totalPrice / totalAmount; // Fallback calc
+        // Unit Price (uusd) - Calculate manually as primary method to be safe
+        let avgUnitPrice = 0;
+        if (totalAmount !== 0) {
+            avgUnitPrice = totalPrice / totalAmount;
         }
 
         // Scale Logic (Big/Small)
-        // "Binary column big/small base on total usd and volumn"
-        // Interpretation: If EITHER is above median, it's 'Big' (Inclusive approach), 
-        // OR strictly based on one? User said "base on total usd and volumn".
-        // Using "Big" if Revenue > Median OR Volume > Median to be generous, 
-        // or AND to be strict. Let's start with Revenue as primary driver for business scale.
         const isBig = totalPrice > medianRev;
         const scale = isBig ? 'Big' : 'Small';
 
         return {
             // Dashboard Standard Keys
-            Date_Trade: item.date, // SheetJS parses YYYY/MM/DD to Date object
+            Date_Trade: this.parseDate(rawDate),
             HS_Code: hsCode,
             Category: category,      // Legacy/Grouping
             HS_Description: category, // Filtering
@@ -268,12 +310,12 @@ class DataProcessor {
             Avg_Unit_Price: avgUnitPrice,
 
             // Entities
-            Supplier: item.seller,   // Foreign Seller
-            Buyer: item.buyer,       // Vietnam Buyer
+            Supplier: rawSeller || 'Unknown',
+            Buyer: rawBuyer || 'Unknown',
 
             // Metadata
-            Supplier_Location: item.seller_country,
-            Buyer_Location: item.buyer_country,
+            Supplier_Location: rawSellerLoc || 'Unknown',
+            Buyer_Location: rawBuyerLoc || 'Unknown',
 
             // New Metric
             Scale: scale
