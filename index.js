@@ -1614,10 +1614,10 @@ You are analyzing a business dashboard for "${company}" that consists of ${chart
         }
 
         // Try user requested model first, then fallbacks
+        // Try user requested model first, then fallbacks
         const models = [
-            'gemini-2.0-flash-exp',
-            'gemini-1.5-flash',
-            'gemini-1.5-pro'
+            'gemini-1.5-flash',       // Stable, fast, requested by user
+            'gemini-2.0-flash-exp'    // Experimental fallback
         ];
 
         let lastError = null;
