@@ -3,6 +3,7 @@ key.txt
 .env
 api_keys.txt
 secrets.json
+.streamlit/secrets.toml
 
 # System files
 .DS_Store

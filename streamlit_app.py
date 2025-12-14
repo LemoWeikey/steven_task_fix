@@ -30,11 +30,28 @@ except Exception as e:
     print(f"Error loading CSV: {e}")
     json_csv = "null" # JS will see window.INJECTED_CSV_DATA = null;
 
-# Helper script to inject data
+# Load API Key from Streamlit Secrets
+try:
+    gemini_api_key = st.secrets.get("GEMINI_API_KEY", "")
+    if not gemini_api_key:
+        print("⚠️ Warning: GEMINI_API_KEY not found in Streamlit secrets")
+except Exception as e:
+    print(f"⚠️ Error reading secrets: {e}")
+    gemini_api_key = ""
+
+# Helper script to inject data AND API key
 injection_script = f"""
 <script>
     window.INJECTED_CSV_DATA = {json_csv};
     console.log('📦 CSV Data Injected. Length:', window.INJECTED_CSV_DATA ? window.INJECTED_CSV_DATA.length : 'NULL');
+    
+    // Inject API Key from Streamlit Secrets into localStorage
+    if ("{gemini_api_key}") {{
+        localStorage.setItem('gemini_api_key', "{gemini_api_key}");
+        console.log('🔑 API Key injected from Streamlit secrets');
+    }} else {{
+        console.warn('⚠️ No API key available from secrets');
+    }}
 </script>
 """
 
