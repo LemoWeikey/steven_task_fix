@@ -1730,94 +1730,10 @@ You are analyzing a business dashboard for "${company}" that consists of ${chart
         }
     }
 
-    showSplitView() {
-        document.getElementById('app').style.display = 'none';
-        document.getElementById('analysisView').classList.remove('hidden');
-
-        const container = document.getElementById('analysisChartsContainer');
-        container.innerHTML = '';
-
-        this.dragDrop.draggedCharts.forEach(chart => {
-            const chartCard = this.dragDrop.createChartCard(chart, -1);
-            chartCard.querySelector('.remove-chart-btn')?.remove();
-            container.appendChild(chartCard);
-        });
-
-        setTimeout(() => {
-            this.dragDrop.draggedCharts.forEach(chart => {
-                this.renderChartInAnalysis(chart);
-            });
-            lucide.createIcons();
-        }, 100);
-    }
-
-    renderChartInAnalysis(chart) {
-        const canvas = document.querySelector(`#analysisChartsContainer #dropped-chart-${chart.id}`);
-        if (!canvas) return;
-
-        let config, data;
-
-        if (chart.type === 'line') {
-            data = dataProcessor.getTimeSeriesData();
-            config = this.dashboard.getLineChartConfig(data);
-        } else if (chart.type === 'pie') {
-            data = dataProcessor.getCategoryDistribution();
-            config = this.dashboard.getPieChartConfig(data);
-        } else if (chart.type === 'bar') {
-            data = dataProcessor.getTop10Products();
-            config = this.dashboard.getBarChartConfig(data);
-        } else if (chart.type === 'category-top10' && chart.category) {
-            data = dataProcessor.getTop10ProductsByCategory(chart.category);
-            if (data) {
-                config = {
-                    type: 'bar',
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            label: 'Revenue (USD)',
-                            data: data.revenue,
-                            backgroundColor: '#8b5cf6',
-                            borderRadius: 6
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: (context) => `Revenue: $${context.parsed.x.toLocaleString()}`
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: { color: 'rgba(51, 65, 85, 0.3)' },
-                                ticks: { color: '#94a3b8' }
-                            },
-                            y: {
-                                grid: { display: false },
-                                ticks: { color: '#94a3b8', font: { size: 11 } }
-                            }
-                        }
-                    }
-                };
-            }
-        }
-
-        if (config && data) {
-            new Chart(canvas, config);
-        }
-    }
-
-    closeSplitView() {
-        document.getElementById('app').style.display = 'flex';
-        document.getElementById('analysisView').classList.add('hidden');
-        document.getElementById('analysisChartsContainer').innerHTML = '';
-        document.getElementById('analysisReport').innerHTML = '';
-    }
+    // Obsolete methods removed (merged into main logic)
+    // - showSplitView
+    // - renderChartInAnalysis 
+    // - closeSplitView
 }
 
 
