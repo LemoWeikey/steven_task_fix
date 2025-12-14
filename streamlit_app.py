@@ -157,31 +157,58 @@ html_template = f"""
             </section>
             
              <!-- Control Section -->
+            <!-- Control Section -->
             <section id="control-section" class="content-section hidden">
-                 <div class="content-header">
+                <div class="content-header">
                     <h1 class="content-title">Control System</h1>
                     <p class="content-subtitle">AI Analyst & Reporting</p>
                 </div>
-                 <div class="control-panel">
+                
+                <!-- Dropped Charts Area -->
+                <div id="droppedChartsSection" style="display: none; margin-bottom: 24px;">
+                    <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h3>Analysis Scope</h3>
+                        <button id="clearAllCharts" class="secondary-btn small" style="padding: 4px 12px; font-size: 12px;"><i data-lucide="trash-2"></i> Clear All</button>
+                    </div>
+                    <div id="droppedChartsContainer" class="dropped-charts-grid">
+                        <!-- Charts will be rendered here by JS -->
+                    </div>
+                    <div class="analysis-actions" style="margin-top: 20px; display: flex; justify-content: center;">
+                         <button class="primary-btn pulse-animation" id="analyzeDashboard" style="width: 200px;">
+                            <i data-lucide="sparkles"></i> Run AI Analysis
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Drop Zone (Empty State) -->
+                <div id="chartDropZone" class="drop-zone">
+                    <div class="drop-icon"><i data-lucide="layout-dashboard"></i></div>
+                    <h3>Drag & Drop Charts Here</h3>
+                    <p>Select charts from Insight/Overview and drop them here to analyze.</p>
+                </div>
+
+                 <!-- Analysis Result Area -->
+                 <div id="analysisResult" class="analysis-result hidden" style="margin-top: 24px;">
+                    <div class="analysis-header">
+                        <div class="ai-avatar"><i data-lucide="bot"></i></div>
+                        <div class="ai-info"><h4>AI Analyst</h4><span class="ai-status">Online</span></div>
+                    </div>
+                    <div id="analysisLoading" class="analysis-loading hidden">
+                         <div class="loading-spinner"></div>
+                         <p>Consulting AI Analyst...</p>
+                    </div>
+                    <div class="analysis-body" id="analysisText"></div>
+                </div>
+
+                 <!-- Legacy Control Panel (Optional, kept at bottom or removed if redundant) -->
+                 <!-- User wanted "Generate Report" etc, so keep them but below or to side -->
+                 <div class="control-panel" style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
                     <div class="control-card">
                         <div class="control-icon"><i data-lucide="file-text"></i></div>
                         <h3>Generate Report</h3>
                         <p>Create detailed PDF reports.</p>
                         <button class="secondary-btn">Export PDF</button>
                     </div>
-                     <div class="control-card highlight">
-                        <div class="control-icon"><i data-lucide="brain-circuit"></i></div>
-                        <h3>AI Analyst</h3>
-                        <p>Get automated insights.</p>
-                         <button class="primary-btn" id="analyzeBtn">Analyze Data</button>
-                    </div>
-                </div>
-                 <div id="analysisResult" class="analysis-result hidden">
-                    <div class="analysis-header">
-                        <div class="ai-avatar"><i data-lucide="bot"></i></div>
-                        <div class="ai-info"><h4>AI Analyst</h4><span class="ai-status">Online</span></div>
-                    </div>
-                    <div class="analysis-body" id="analysisText"></div>
                 </div>
             </section>
         </main>

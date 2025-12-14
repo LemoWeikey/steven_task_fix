@@ -554,12 +554,12 @@ class DashboardController {
                 ]
             },
             options: {
-                indexAxis: 'y', // Horizontal bars for names
+                indexAxis: 'x', // Vertical bars
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false  // Hide legend in small view
+                        display: false
                     },
                     tooltip: {
                         callbacks: {
@@ -573,8 +573,11 @@ class DashboardController {
                             display: false
                         },
                         ticks: {
-                            display: false,
-                            color: '#94a3b8'
+                            color: '#e2e8f0', // Lighter text for names
+                            maxRotation: 45,
+                            minRotation: 45,
+                            autoSkip: false,
+                            font: { size: 10 }
                         }
                     },
                     y: {
@@ -583,16 +586,15 @@ class DashboardController {
                             color: 'rgba(51, 65, 85, 0.3)'
                         },
                         ticks: {
-                            color: '#e2e8f0', // Lighter text for names
-                            maxTicksLimit: 10,
-                            font: { size: 10 }
+                            color: '#94a3b8',
+                            callback: (value) => '$' + value.toLocaleString()
                         },
                         title: {
                             display: false
                         }
                     },
                     y1: {
-                        display: false // Hide secondary axis in small view
+                        display: false
                     }
                 }
             }
