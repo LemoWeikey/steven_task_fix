@@ -605,37 +605,45 @@ class DashboardController {
 
         const detailsContainer = document.getElementById('companyDetails');
 
-        const details = [
-            { label: 'Name', value: summary.Name || this.selectedCompany || 'N/A' },
-            { label: 'Location', value: summary.Location || 'N/A' }
-        ];
+        if (detailsContainer) {
+            const details = [
+                { label: 'Name', value: summary.Name || this.selectedCompany || 'N/A' },
+                { label: 'Location', value: summary.Location || 'N/A' }
+            ];
 
-        detailsContainer.innerHTML = details.map(detail => `
-            <div class="detail-item">
-                <div class="detail-label">${detail.label}</div>
-                <div class="detail-value ${detail.highlight ? 'highlight' : ''}">${detail.value}</div>
-            </div>
-        `).join('');
+            detailsContainer.innerHTML = details.map(detail => `
+                <div class="detail-item">
+                    <div class="detail-label">${detail.label}</div>
+                    <div class="detail-value ${detail.highlight ? 'highlight' : ''}">${detail.value}</div>
+                </div>
+            `).join('');
+        }
     }
 
     setupEventListeners() {
         // Close pie popup
-        document.getElementById('closePiePopup').addEventListener('click', () => {
-            document.getElementById('piePopup').classList.add('hidden');
-            if (this.charts.piePopup) {
-                this.charts.piePopup.destroy();
-                this.charts.piePopup = null;
-            }
-        });
+        const closePieBtn = document.getElementById('closePiePopup');
+        if (closePieBtn) {
+            closePieBtn.addEventListener('click', () => {
+                document.getElementById('piePopup').classList.add('hidden');
+                if (this.charts.piePopup) {
+                    this.charts.piePopup.destroy();
+                    this.charts.piePopup = null;
+                }
+            });
+        }
 
         // Close modal pie popup
-        document.getElementById('closeModalPiePopup').addEventListener('click', () => {
-            document.getElementById('modalPiePopup').classList.add('hidden');
-            if (this.charts.modalPiePopup) {
-                this.charts.modalPiePopup.destroy();
-                this.charts.modalPiePopup = null;
-            }
-        });
+        const closeModalPieBtn = document.getElementById('closeModalPiePopup');
+        if (closeModalPieBtn) {
+            closeModalPieBtn.addEventListener('click', () => {
+                document.getElementById('modalPiePopup').classList.add('hidden');
+                if (this.charts.modalPiePopup) {
+                    this.charts.modalPiePopup.destroy();
+                    this.charts.modalPiePopup = null;
+                }
+            });
+        }
 
         // Expand buttons
         document.querySelectorAll('.expand-btn').forEach(btn => {
@@ -651,8 +659,12 @@ class DashboardController {
         const modal = document.getElementById('chartModal');
         const overlay = modal.querySelector('.modal-overlay');
 
-        closeModalBtn.addEventListener('click', () => this.closeModal());
-        overlay.addEventListener('click', () => this.closeModal());
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', () => this.closeModal());
+        }
+        if (overlay) {
+            overlay.addEventListener('click', () => this.closeModal());
+        }
 
         // ESC key to close modal
         document.addEventListener('keydown', (e) => {
@@ -1820,13 +1832,16 @@ class OverviewController {
             }
         });
 
-        // Top 10 View Type Toggle
-        document.querySelectorAll('input[name="topViewType"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    this.topViewType = e.target.value;
-                    this.updateDashboard(); // Re-render charts
-                }
+        // Top 10 View Type Toggle (Buttons)
+        document.querySelectorAll('.toggle-btn[data-view]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Remove active class from all
+                document.querySelectorAll('.toggle-btn[data-view]').forEach(b => b.classList.remove('active'));
+                // Add active to clicked
+                e.target.classList.add('active');
+
+                this.topViewType = e.target.getAttribute('data-view') === 'supplier' ? 'Supplier' : 'Buyer';
+                this.updateDashboard(); // Re-render charts
             });
         });
     }
