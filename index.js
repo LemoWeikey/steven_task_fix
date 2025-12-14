@@ -1613,11 +1613,9 @@ You are analyzing a business dashboard for "${company}" that consists of ${chart
             throw new Error("API Key required. Please reload and provide a valid key.");
         }
 
-        // Try user requested model first, then fallbacks
-        // Try user requested model first, then fallbacks
+        // Try user requested model (Force 1.5 Flash Latest)
         const models = [
-            'gemini-1.5-flash',       // Stable, fast, requested by user
-            'gemini-2.0-flash-exp'    // Experimental fallback
+            'gemini-1.5-flash-latest'
         ];
 
         let lastError = null;
