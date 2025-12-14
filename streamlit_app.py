@@ -134,15 +134,15 @@ html_template = f"""
                 <div id="dashboardContent" class="dashboard-content hidden">
                     <div class="kpi-grid" id="kpiGrid"></div>
                     <div class="charts-grid">
-                        <div class="chart-card" data-chart="line">
+                        <div class="chart-card" data-chart="line" draggable="true" data-chart-type="line">
                             <div class="chart-header"><h3>Revenue Trend</h3><button class="expand-btn" data-chart="line"><i data-lucide="maximize-2"></i></button></div>
                             <div class="chart-container"><canvas id="lineChart"></canvas></div>
                         </div>
-                        <div class="chart-card" data-chart="pie">
+                        <div class="chart-card" data-chart="pie" draggable="true" data-chart-type="pie">
                             <div class="chart-header"><h3>Revenue Distribution</h3><button class="expand-btn" data-chart="pie"><i data-lucide="maximize-2"></i></button></div>
                             <div class="chart-container"><canvas id="pieChart"></canvas></div>
                         </div>
-                        <div class="chart-card" data-chart="bar">
+                        <div class="chart-card" data-chart="bar" draggable="true" data-chart-type="bar">
                             <div class="chart-header"><h3>Top 10 Sellers</h3><button class="expand-btn" data-chart="bar"><i data-lucide="maximize-2"></i></button></div>
                             <div class="chart-container"><canvas id="barChart"></canvas></div>
                         </div>
