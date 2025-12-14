@@ -157,57 +157,76 @@ html_template = f"""
             </section>
             
              <!-- Control Section -->
-            <!-- Control Section -->
-            <section id="control-section" class="content-section hidden">
-                <div class="content-header">
+            <section id="control-section" class="content-section hidden" style="height: calc(100vh - 100px); overflow: hidden;">
+                <div class="content-header" style="margin-bottom: 10px;">
                     <h1 class="content-title">Control System</h1>
                     <p class="content-subtitle">AI Analyst & Reporting</p>
                 </div>
-                
-                <!-- Dropped Charts Area -->
-                <div id="droppedChartsSection" style="display: none; margin-bottom: 24px;">
-                    <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <h3>Analysis Scope</h3>
-                        <button id="clearAllCharts" class="secondary-btn small" style="padding: 4px 12px; font-size: 12px;"><i data-lucide="trash-2"></i> Clear All</button>
-                    </div>
-                    <div id="droppedChartsContainer" class="dropped-charts-grid">
-                        <!-- Charts will be rendered here by JS -->
-                    </div>
-                    <div class="analysis-actions" style="margin-top: 20px; display: flex; justify-content: center;">
-                         <button class="primary-btn pulse-animation" id="analyzeDashboard" style="width: 200px;">
-                            <i data-lucide="sparkles"></i> Run AI Analysis
-                        </button>
-                    </div>
-                </div>
 
-                <!-- Drop Zone (Empty State) -->
-                <div id="chartDropZone" class="drop-zone">
-                    <div class="drop-icon"><i data-lucide="layout-dashboard"></i></div>
-                    <h3>Drag & Drop Charts Here</h3>
-                    <p>Select charts from Insight/Overview and drop them here to analyze.</p>
-                </div>
+                <div class="split-dashboard" id="splitViewContainer" style="display: flex; gap: 20px; height: 100%; box-sizing: border-box; padding-bottom: 20px;">
+                    
+                    <!-- LEFT COLUMN: Charts & Input -->
+                    <div class="split-column left" style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding-right: 10px;">
+                        
+                        <!-- Dropped Charts -->
+                        <div id="droppedChartsSection" style="display: none; margin-bottom: 24px;">
+                            <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                                <h3>Analysis Scope</h3>
+                                <button id="clearAllCharts" class="secondary-btn small" style="padding: 4px 12px; font-size: 12px;"><i data-lucide="trash-2"></i> Clear All</button>
+                            </div>
+                            <div id="droppedChartsContainer" class="dropped-charts-grid">
+                                <!-- Charts rendered here -->
+                            </div>
+                            
+                            <!-- Action Area -->
+                            <div class="analysis-actions" style="margin-top: 30px; display: flex; justify-content: center;">
+                                 <button id="analyzeDashboard" class="modern-glow-btn">
+                                    <span class="btn-icon"><i data-lucide="sparkles"></i></span>
+                                    <span class="btn-text">Run AI Analysis</span>
+                                </button>
+                            </div>
+                        </div>
 
-                 <!-- Analysis Result Area -->
-                 <div id="analysisResult" class="analysis-result hidden" style="margin-top: 24px;">
-                    <div class="analysis-header">
-                        <div class="ai-avatar"><i data-lucide="bot"></i></div>
-                        <div class="ai-info"><h4>AI Analyst</h4><span class="ai-status">Online</span></div>
-                    </div>
-                    <div id="analysisLoading" class="analysis-loading hidden">
-                         <div class="loading-spinner"></div>
-                         <p>Consulting AI Analyst...</p>
-                    </div>
-                    <div class="analysis-body" id="analysisText"></div>
-                </div>
+                        <!-- Drop Zone -->
+                        <div id="chartDropZone" class="drop-zone" style="flex: 1; min-height: 300px; display: flex;">
+                            <div class="drop-content">
+                                <div class="drop-icon"><i data-lucide="layout-dashboard"></i></div>
+                                <h3>Drag & Drop Charts Here</h3>
+                                <p>Drag charts from the Insight section to start.</p>
+                            </div>
+                        </div>
 
-                 <!-- Legacy Control Panel (Optional, kept at bottom or removed if redundant) -->
-                 <!-- User wanted "Generate Report" etc, so keep them but below or to side -->
-                 <div class="control-panel" style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-                    <div class="control-card">
-                        <div class="control-icon"><i data-lucide="file-text"></i></div>
-                        <h3>Generate Report</h3>
-                        <p>Create detailed PDF reports.</p>
-                        <button class="secondary-btn">Export PDF</button>
+                        <!-- Legacy Controls (Bottom Left) -->
+                        <div class="control-panel-mini" style="margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                            <div class="control-card small">
+                                <i data-lucide="file-text"></i>
+                                <div>
+                                    <h4>Generate Report</h4>
+                                    <button class="text-btn">Export PDF</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN: AI Output -->
+                    <div class="split-column right" id="analysisPanel" style="flex: 1; background: rgba(15, 23, 42, 0.6); border-radius: 16px; border: 1px solid rgba(51, 65, 85, 0.5); padding: 24px; overflow-y: auto; display: none; flex-direction: column;">
+                         <div class="analysis-header" style="margin-bottom: 20px; border-bottom: 1px solid rgba(51, 65, 85, 0.5); padding-bottom: 15px;">
+                            <div class="ai-avatar-large"><i data-lucide="bot"></i></div>
+                            <div class="ai-title">
+                                <h3>AI Data Consultant</h3>
+                                <span class="status-indicator online">Online</span>
+                            </div>
+                            <button id="closeAnalysisBtn" style="margin-left: auto; background: none; border: none; color: #94a3b8; cursor: pointer;"><i data-lucide="x"></i></button>
+                        </div>
+
+                        <div id="analysisLoading" class="analysis-loading hidden">
+                             <div class="spinner-modern"></div>
+                             <p class="scramble-text">Initializing parameters...</p>
+                        </div>
+
+                        <div id="analysisResult" class="analysis-markdown hidden">
+                            <!-- AI Text Output -->
+                        </div>
                     </div>
                 </div>
             </section>

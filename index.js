@@ -1462,8 +1462,11 @@ class AnalysisController {
 
             // Show initial loading state
             this.updateLoadingStatus('Capturing your charts...');
-            document.getElementById('analysisLoading').classList.remove('hidden');
-            document.getElementById('analysisReport').classList.add('hidden');
+            const loadingEl = document.getElementById('analysisLoading');
+            const resultEl = document.getElementById('analysisResult');
+
+            if (loadingEl) loadingEl.classList.remove('hidden');
+            if (resultEl) resultEl.classList.add('hidden');
 
             // Step 1: Capture Images
             const chartImages = await this.captureChartsAsImages();
@@ -1487,23 +1490,44 @@ class AnalysisController {
         } catch (error) {
             console.error('❌ Analysis error:', error);
 
-            // Ensure view is visible to show error
-            document.getElementById('analysisView').classList.remove('hidden');
-            document.getElementById('analysisLoading').classList.add('hidden');
-            document.getElementById('analysisReport').classList.remove('hidden');
+            const loadingEl = document.getElementById('analysisLoading');
+            const resultEl = document.getElementById('analysisResult');
+            const panelEl = document.getElementById('analysisPanel');
 
-            document.getElementById('analysisReport').innerHTML = `
-                <div style="color: #ef4444; padding: 20px; text-align: center;">
-                    <h3>⚠️ Analysis Failed</h3>
-                    <p>${error.message}</p>
-                    <br>
-                    <button onclick="window.location.reload()" style="padding: 8px 16px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Reload Page
-                    </button>
-                </div>
-            `;
+            // Ensure view is visible to show error
+            if (panelEl) panelEl.style.display = 'flex';
+            if (loadingEl) loadingEl.classList.add('hidden');
+            if (resultEl) {
+                resultEl.classList.remove('hidden');
+                resultEl.innerHTML = `
+                    <div style="color: #ef4444; padding: 20px; text-align: center;">
+                        <h3>⚠️ Analysis Failed</h3>
+                        <p>${error.message}</p>
+                        <br>
+                        <button onclick="window.location.reload()" style="padding: 8px 16px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Reload Page
+                        </button>
+                    </div>
+                `;
+            }
 
             alert(`Analysis Failed: ${error.message}`);
+        }
+    }
+
+    showSplitView() {
+        const panel = document.getElementById('analysisPanel');
+        if (panel) {
+            panel.style.display = 'flex';
+            // Scroll right column to top
+            panel.scrollTop = 0;
+        }
+    }
+
+    closeSplitView() {
+        const panel = document.getElementById('analysisPanel');
+        if (panel) {
+            panel.style.display = 'none';
         }
     }
 
