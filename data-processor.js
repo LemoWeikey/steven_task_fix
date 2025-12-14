@@ -781,6 +781,42 @@ class DataProcessor {
         };
     }
 
+    // Get Unit Price Timeline (Average USD per unit over time)
+    getUnitPriceTimeline(companyName = this.selectedCompany, role = 'Buyer') {
+        if (!companyName) return null;
+
+        // Filter trades based on role
+        const trades = this.dailyData
+            .filter(t => t[role] === companyName)
+            .sort((a, b) => new Date(a.Date_Trade) - new Date(b.Date_Trade));
+
+        // Aggregate by month
+        const months = {};
+        trades.forEach(d => {
+            if (!d.Date_Trade) return;
+            const date = new Date(d.Date_Trade);
+            const mKey = date.getMonth(); // 0-11
+            if (!months[mKey]) months[mKey] = { totalRevenue: 0, totalVolume: 0 };
+            months[mKey].totalRevenue += d.Total_Price || 0;
+            months[mKey].totalVolume += d.Total_Amount || 0;
+        });
+
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const labels = monthNames; // Shows full year
+        const unitPrices = [];
+
+        for (let i = 0; i < 12; i++) {
+            if (months[i] && months[i].totalVolume > 0) {
+                // Calculate average unit price for this month
+                unitPrices.push(months[i].totalRevenue / months[i].totalVolume);
+            } else {
+                unitPrices.push(0);
+            }
+        }
+
+        return { labels, unitPrices };
+    }
+
     monthNameToIndex(monthName) {
         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         // Handle full names or short names

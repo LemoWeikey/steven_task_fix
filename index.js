@@ -153,6 +153,7 @@ class DashboardController {
         this.renderLineChart();
         this.renderPieChart();
         this.renderBarChart();
+        this.renderUnitPriceChart();
         this.renderCompanyDetails();
 
         // Refresh icons
@@ -595,6 +596,71 @@ class DashboardController {
                     },
                     y1: {
                         display: false
+                    }
+                }
+            }
+        });
+    }
+
+    renderUnitPriceChart() {
+        const data = dataProcessor.getUnitPriceTimeline(this.selectedCompany);
+        if (!data) return;
+
+        const ctx = document.getElementById('unitPriceChart');
+
+        if (this.charts.unitPrice) {
+            this.charts.unitPrice.destroy();
+        }
+
+        this.charts.unitPrice = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Unit Price (USD)',
+                    data: data.unitPrices,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `Price: $${context.parsed.y.toFixed(2)}`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(51, 65, 85, 0.3)'
+                        },
+                        ticks: {
+                            color: '#94a3b8',
+                            callback: (value) => '$' + value.toFixed(2)
+                        }
                     }
                 }
             }

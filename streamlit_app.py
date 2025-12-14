@@ -146,7 +146,6 @@ html_template = f"""
                     </div>
                 </div>
                 <div id="loadingState" class="loading-state"><div class="loading-spinner"></div><p>Loading analytics data...</p></div>
-                <div id="emptyState" class="empty-state"><div class="empty-icon"><i data-lucide="bar-chart-2"></i></div><h3>No Company Selected</h3><p>Please select a company to view detailed analytics.</p></div>
                 
                 <div id="dashboardContent" class="dashboard-content hidden">
                     <div class="kpi-grid" id="kpiGrid"></div>
@@ -162,6 +161,10 @@ html_template = f"""
                         <div class="chart-card" data-chart="bar" draggable="true" data-chart-type="bar">
                             <div class="chart-header"><h3>Top 10 Sellers</h3><button class="expand-btn" data-chart="bar"><i data-lucide="maximize-2"></i></button></div>
                             <div class="chart-container"><canvas id="barChart"></canvas></div>
+                        </div>
+                        <div class="chart-card" data-chart="unitprice" draggable="true" data-chart-type="unitprice">
+                            <div class="chart-header"><h3>Unit Price Timeline</h3><button class="expand-btn" data-chart="unitprice"><i data-lucide="maximize-2"></i></button></div>
+                            <div class="chart-container"><canvas id="unitPriceChart"></canvas></div>
                         </div>
                     </div>
                 <div class="company-details-card"><h3>Company Details</h3><div id="companyDetails"></div></div>
