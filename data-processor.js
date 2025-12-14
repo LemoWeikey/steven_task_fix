@@ -45,14 +45,28 @@ class DataProcessor {
             const dailySheet = workbook.Sheets[sheetName];
 
             if (dailySheet) {
-                const rawData = XLSX.utils.sheet_to_json(dailySheet);
+                let rawRecords = XLSX.utils.sheet_to_json(dailySheet);
+
+                // SANITIZE KEYS: content with BOM or whitespace issues
+                // E.g. "\ufeffdate" -> "date"
+                const cleanKey = (key) => key.trim().replace(/^[\uFEFF\s]+|[\s]+$/g, '');
+
+                const rawData = rawRecords.map(row => {
+                    const newRow = {};
+                    Object.keys(row).forEach(k => {
+                        newRow[cleanKey(k)] = row[k];
+                    });
+                    return newRow;
+                });
+
                 console.log(`✅ Loaded ${rawData.length} raw records from ${sheetName}`);
                 updateStatus(`✅ Processing ${rawData.length} records...`);
 
                 // Calculate Medians for Scale Logic (Big/Small)
                 // Filter out invalid numbers first
-                const revenues = rawData.map(d => parseFloat(d.value_usd)).filter(n => !isNaN(n)).sort((a, b) => a - b);
-                const volumes = rawData.map(d => parseFloat(d.quantity)).filter(n => !isNaN(n)).sort((a, b) => a - b);
+                // Safety check: verify value_usd exists after sanitation
+                const revenues = rawData.map(d => parseFloat(d['value_usd'] || d['Value USD'] || 0)).filter(n => !isNaN(n)).sort((a, b) => a - b);
+                const volumes = rawData.map(d => parseFloat(d['quantity'] || d['Quantity'] || 0)).filter(n => !isNaN(n)).sort((a, b) => a - b);
 
                 const getMedian = (arr) => {
                     if (arr.length === 0) return 0;
