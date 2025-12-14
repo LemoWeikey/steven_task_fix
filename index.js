@@ -2174,6 +2174,16 @@ try {
     const analysisController = new AnalysisController(dashboard, dragDrop);
 
     console.log('🚀 Application initialized successfully!');
+
+    // Fail-safe: Force hide loading after 5 seconds if still visible
+    setTimeout(() => {
+        const loading = document.getElementById('loadingState');
+        if (loading && !loading.classList.contains('hidden')) {
+            console.warn('⚠️ Loading state stuck? Forcing hide.');
+            loading.style.display = 'none';
+        }
+    }, 5000);
+
 } catch (error) {
     console.error('CRITICAL ERROR:', error);
     const container = document.getElementById('loadingState');
