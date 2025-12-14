@@ -2175,14 +2175,14 @@ try {
 
     console.log('🚀 Application initialized successfully!');
 
-    // Fail-safe: Force hide loading after 5 seconds if still visible
+    // Fail-safe: Force hide loading after 3 seconds (reduced) if still visible
     setTimeout(() => {
         const loading = document.getElementById('loadingState');
-        if (loading && !loading.classList.contains('hidden')) {
-            console.warn('⚠️ Loading state stuck? Forcing hide.');
-            loading.style.display = 'none';
+        if (loading) {
+            console.warn('⚠️ Loading state stuck? Removing from DOM.');
+            loading.remove(); // NUCLEAR OPTION: Remove it entirely
         }
-    }, 5000);
+    }, 3000);
 
 } catch (error) {
     console.error('CRITICAL ERROR:', error);

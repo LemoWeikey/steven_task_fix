@@ -4,9 +4,9 @@ import os
 
 st.set_page_config(layout="wide")
 
-def load_file(filename):
     with open(filename, 'r', encoding='utf-8') as f:
         return f.read()
+
 
 # Load specific CSS/JS content
 try:
@@ -62,6 +62,7 @@ html_template = f"""
     <!-- App Structure (Copied from app.html body inner content) -->
     <!-- We need the inner content of body from app.html, excluding scripts we add manually -->
     <div class="app-background"></div>
+    <div style="position:fixed; top:0; left:0; background:rgba(0,0,0,0.5); color:#0f0; font-size:10px; z-index:99999; pointer-events:none;">v1.2 - Debugging Active</div>
     <div class="app-container" id="app">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
