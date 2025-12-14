@@ -1373,6 +1373,55 @@ class DragDropController {
                     }
                 };
             }
+        } else if (chart.type === 'unitprice') {
+            // Unit Price Timeline chart
+            data = dataProcessor.getUnitPriceTimeline();
+            if (data) {
+                config = {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Unit Price (USD)',
+                            data: data.unitPrices,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => `Price: $${context.parsed.y.toFixed(2)}`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8', font: { size: 10 } }
+                            },
+                            y: {
+                                grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    callback: (value) => '$' + value.toFixed(2)
+                                }
+                            }
+                        }
+                    }
+                };
+            }
         }
 
         if (config && data) {
@@ -1409,7 +1458,8 @@ class DragDropController {
         const titles = {
             'line': 'Transactions & Revenue',
             'pie': 'Category Distribution',
-            'bar': 'Top 10 Products'
+            'bar': 'Top 10 Products',
+            'unitprice': 'Unit Price Timeline'
         };
         return titles[type] || 'Chart';
     }
