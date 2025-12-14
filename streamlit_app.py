@@ -147,11 +147,11 @@ html_template = f"""
                             <div class="chart-container"><canvas id="barChart"></canvas></div>
                         </div>
                     </div>
-                    <div class="company-details-card"><h3>Company Details</h3><div id="companyDetailsContent"></div></div>
+                <div class="company-details-card"><h3>Company Details</h3><div id="companyDetails"></div></div>
                 </div>
             </section>
 
-            <!-- Copilot Section -->
+            <!-- Insight Section -->
             <section id="copilot-section" class="content-section hidden">
                 <!-- Copilot content rendered by JS -->
             </section>
@@ -187,7 +187,24 @@ html_template = f"""
         </main>
         
         <!-- Modals -->
-        <div class="chart-modal hidden" id="chartModal"><div class="modal-content"><div class="modal-header"><h3 id="modalTitle">Chart Detail</h3><button class="close-modal"><i data-lucide="x"></i></button></div><div class="modal-body"><canvas id="modalChart"></canvas></div></div></div>
+        <div class="chart-modal hidden" id="chartModal"><div class="modal-content"><div class="modal-header"><h3 id="modalTitle">Chart Detail</h3><button class="close-modal" id="closeModal"><i data-lucide="x"></i></button></div><div class="modal-body"><canvas id="modalChart"></canvas></div></div></div>
+        
+        <!-- Popups (Reconstructed) -->
+        <div id="piePopup" class="popup hidden" style="position:absolute; width: 300px; height: 250px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; z-index: 1001; padding: 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+            <div class="popup-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 id="popupTitle" style="margin:0; font-size:14px; color:#f8fafc;">Top Products</h4>
+                <button id="closePiePopup" style="background:none; border:none; color:#94a3b8; cursor:pointer;"><i data-lucide="x"></i></button>
+            </div>
+            <div class="popup-chart-container" style="height: 180px;"><canvas id="piePopupChart"></canvas></div>
+        </div>
+
+        <div id="modalPiePopup" class="popup hidden" style="position:absolute; width: 300px; height: 250px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; z-index: 2000; padding: 15px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+            <div class="popup-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 id="modalPopupTitle" style="margin:0; font-size:14px; color:#f8fafc;">Top Products</h4>
+                <button id="closeModalPiePopup" style="background:none; border:none; color:#94a3b8; cursor:pointer;"><i data-lucide="x"></i></button>
+            </div>
+            <div class="popup-chart-container" style="height: 180px;"><canvas id="modalPiePopupChart"></canvas></div>
+        </div>
         
     </div>
 
