@@ -194,49 +194,49 @@ html_template = f"""
     <!-- Scripts -->
     <!-- Data Processor -->
     <script>
-    try {
+    try {{
         {processor_content}
-    } catch (e) { console.error('Data Processor Error:', e); }
+    }} catch (e) {{ console.error('Data Processor Error:', e); }}
     </script>
 
     <!-- Recommendation Controller -->
     <script>
-    try {
+    try {{
         {rec_controller_content}
-    } catch (e) { console.error('Rec Controller Error:', e); }
+    }} catch (e) {{ console.error('Rec Controller Error:', e); }}
     </script>
 
     <!-- Analysis Controller -->
     <script>
-    try {
+    try {{
         {analysis_controller_content}
-    } catch (e) { console.error('Analysis Controller Error:', e); }
+    }} catch (e) {{ console.error('Analysis Controller Error:', e); }}
     </script>
 
     <!-- Main Index Logic -->
     <script>
-    try {
+    try {{
         {js_content}
-    } catch (e) { 
+    }} catch (e) {{ 
         console.error('Index JS Error:', e);
         alert('Critical JS Error in Index: ' + e.message);
-    }
+    }}
     </script>
 
     <!-- GUARANTEED FAIL-SAFE: Remove Loading Screen -->
     <script>
-    (function() {
+    (function() {{
         console.log('🛡️ Fail-safe script loaded. Waiting 4 seconds...');
-        setTimeout(function() {
+        setTimeout(function() {{
             var loading = document.getElementById('loadingState');
-            if (loading) {
+            if (loading) {{
                 console.warn('🛡️ Fail-safe executing: Removing loading state.');
                 loading.remove();
-            } else {
+            }} else {{
                 console.log('🛡️ Loading state already gone.');
-            }
-        }, 4000);
-    })();
+            }}
+        }}, 4000);
+    }})();
     </script>
 </body>
 </html>
