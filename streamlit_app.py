@@ -194,23 +194,17 @@ html_template = f"""
     <!-- Scripts -->
     <!-- Data Processor -->
     <script>
-    try {{
-        {processor_content}
-    }} catch (e) {{ console.error('Data Processor Error:', e); }}
+    {processor_content}
     </script>
 
     <!-- Recommendation Controller -->
     <script>
-    try {{
-        {rec_controller_content}
-    }} catch (e) {{ console.error('Rec Controller Error:', e); }}
+    {rec_controller_content}
     </script>
 
     <!-- Analysis Controller -->
     <script>
-    try {{
-        {analysis_controller_content}
-    }} catch (e) {{ console.error('Analysis Controller Error:', e); }}
+    {analysis_controller_content}
     </script>
 
     <!-- Main Index Logic -->
