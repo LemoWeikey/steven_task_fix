@@ -1613,9 +1613,10 @@ You are analyzing a business dashboard for "${company}" that consists of ${chart
             throw new Error("API Key required. Please reload and provide a valid key.");
         }
 
-        // Try user requested model (Force 1.5 Flash Latest)
+        // Try user requested model (Force 1.5 Flash Stable)
+        // "2.5" is likely a typo, and 2.0-exp hits quota limits.
         const models = [
-            'gemini-1.5-flash-latest'
+            'gemini-1.5-flash'
         ];
 
         let lastError = null;

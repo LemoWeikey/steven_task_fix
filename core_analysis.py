@@ -84,7 +84,7 @@ You are analyzing a dashboard that may consist of multiple pages (e.g., Export, 
 IMPORTANT: Do NOT generate a separate \"Actionable Recommendations\" section. Focus only on insights, trends, and risks.
 """
 
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-1.5-flash"
 
 
 class DashboardAnalyzer:
